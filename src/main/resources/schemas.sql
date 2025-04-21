@@ -33,7 +33,8 @@ CREATE TABLE employees(
     CONSTRAINT fk_employees_profile_image_id
         FOREIGN KEY (profile_image_id)
             REFERENCES files(id)
-            ON DELETE SET
+            ON DELETE SET NULL,
+
     CONSTRAINT fk_employees_department_id
         FOREIGN KEY (department_id)
             REFERENCES departments(id)
