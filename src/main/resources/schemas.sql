@@ -3,7 +3,7 @@ CREATE TABLE files(
     name VARCHAR(100) NOT NULL,
     type VARCHAR NOT NULL,
     size BIGINT NOT NULL,
-    create_at timestamptz NOT NULL,
+    created_at timestamptz NOT NULL,
     updated_at timestamptz NOT NULL
 );
 
