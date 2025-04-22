@@ -29,6 +29,14 @@ public class Department extends BaseTimeEntity {
   @Column
   private String description;
 
+  public void validateNotDuplicateWith(Department other) {
+    if (other == null) {
+      return;
+    }
 
+    if (this.name.equals(other.getName())) {
+      throw new IllegalArgumentException("중복된 부서 이름입니다");
+    }
+  }
 
 }
