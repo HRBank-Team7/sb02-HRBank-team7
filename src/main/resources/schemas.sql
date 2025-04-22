@@ -41,7 +41,7 @@ CREATE TABLE employees(
             ON DELETE RESTRICT
 );
 
-CREATE TABLE employee_change_log(
+CREATE TABLE employee_change_logs (
     id BIGSERIAL PRIMARY KEY,
     type VARCHAR(100) NOT NULL,
     employee_number VARCHAR(50) NOT NULL,
