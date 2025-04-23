@@ -1,13 +1,16 @@
 package com.sprint.project1.hrbank.dto.employee;
 
-import java.time.Instant;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.time.LocalDate;
 
 public record EmployeeCreateRequest(
-    String name,
-    String email,
-    Long departmentId,
-    String position,
-    Instant hireDate,
+    @NotBlank String name,
+    @NotBlank @Email String email,
+    @NotNull Long departmentId,
+    @NotBlank String position,
+    @NotNull LocalDate hireDate,
     String memo
 ) {
 }
