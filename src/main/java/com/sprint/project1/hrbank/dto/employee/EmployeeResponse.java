@@ -1,9 +1,8 @@
 package com.sprint.project1.hrbank.dto.employee;
 
-import com.sprint.project1.hrbank.entity.employee.EmployeeStatus;
-import java.time.Instant;
+import java.time.LocalDate;
 
-public record EmployeeDto(
+public record EmployeeResponse(
     Long id,
     String name,
     String email,
@@ -11,7 +10,7 @@ public record EmployeeDto(
     Long departmentId,
     String departmentName,
     String position,
-    Instant hireDate,
-    EmployeeStatus status,
+    LocalDate hireDate,
+    String status,
     Long profileImageId
 ) {}
