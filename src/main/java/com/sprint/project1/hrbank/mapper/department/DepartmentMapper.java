@@ -15,7 +15,7 @@ import java.time.ZoneId;
 public interface DepartmentMapper {
 
     @Mapping(target = "establishedDate", source = "department.establishedDate", qualifiedByName = "changeLocalDateInSeoul")
-    DepartmentResponse toResponse(Department department, int employeeCount);
+    DepartmentResponse toResponse(Department department, long employeeCount);
 
 
     @Named("changeLocalDateInSeoul")
