@@ -37,4 +37,15 @@ public class Department extends BaseTimeEntity {
     }
   }
 
+  public void update(String name, Instant establishedDate, String description) {
+    if (name != null || !name.equals(this.name)) {
+      this.name = name;
+    }
+    if (establishedDate != null || !establishedDate.equals(this.establishedDate)) {
+      this.establishedDate = establishedDate;
+    }
+    if (description != null || !description.equals(this.description)) {
+      this.description = description;
+    }
+  }
 }

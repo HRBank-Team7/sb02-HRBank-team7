@@ -1,9 +1,10 @@
 package com.sprint.project1.hrbank.service.department;
 
 import com.sprint.project1.hrbank.dto.department.DepartmentCreateRequest;
-import com.sprint.project1.hrbank.dto.department.DepartmentDto;
+import com.sprint.project1.hrbank.dto.department.DepartmentResponse;
+import com.sprint.project1.hrbank.dto.department.DepartmentUpdateRequest;
 
 public interface DepartmentService {
-    DepartmentDto createDepartment(DepartmentCreateRequest createRequest);
-
+    DepartmentResponse createDepartment(DepartmentCreateRequest createRequest);
+    DepartmentResponse updateDepartment(Long departmentId, DepartmentUpdateRequest updateRequest);
 }
