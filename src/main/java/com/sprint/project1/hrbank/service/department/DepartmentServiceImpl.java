@@ -39,4 +39,12 @@ public class DepartmentServiceImpl implements DepartmentService {
         department.update(updateRequest.name(), updateRequest.establishedDate(), updateRequest.description());
         return departmentMapper.toResponse(department, 10);
     }
+
+    @Override
+    public void deleteDepartment(Long departmentId) {
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new NoSuchElementException("department not found" + departmentId));
+
+        departmentRepository.delete(department);
+    }
 }

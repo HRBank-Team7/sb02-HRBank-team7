@@ -25,5 +25,12 @@ public class DepartmentController {
         DepartmentResponse response = departmentService.updateDepartment(departmentId, request);
         return ResponseEntity.ok().body(response);
     }
+
+    @DeleteMapping("/{departmentId}")
+    public ResponseEntity<Void> deleteDepartment(@PathVariable Long departmentId) {
+        departmentService.deleteDepartment(departmentId);
+
+        return ResponseEntity.noContent().build();
+    }
 }
 
