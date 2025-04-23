@@ -1,14 +1,12 @@
 package com.sprint.project1.hrbank.controller.department;
 
 import com.sprint.project1.hrbank.dto.department.DepartmentCreateRequest;
-import com.sprint.project1.hrbank.dto.department.DepartmentDto;
+import com.sprint.project1.hrbank.dto.department.DepartmentResponse;
+import com.sprint.project1.hrbank.dto.department.DepartmentUpdateRequest;
 import com.sprint.project1.hrbank.service.department.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,9 +15,15 @@ public class DepartmentController {
     private final DepartmentService departmentService;
 
     @PostMapping
-    public ResponseEntity<DepartmentDto> createDepartment(@RequestBody DepartmentCreateRequest departmentCreateRequest) {
-        DepartmentDto dto =departmentService.createDepartment(departmentCreateRequest);
-        return ResponseEntity.ok().body(dto);
+    public ResponseEntity<DepartmentResponse> createDepartment(@RequestBody DepartmentCreateRequest request) {
+        DepartmentResponse response = departmentService.createDepartment(request);
+        return ResponseEntity.ok().body(response);
     }
 
+    @PatchMapping("/{departmentId}")
+    public ResponseEntity<DepartmentResponse> updateDepartment(@PathVariable Long departmentId, @RequestBody DepartmentUpdateRequest request) {
+        DepartmentResponse response = departmentService.updateDepartment(departmentId, request);
+        return ResponseEntity.ok().body(response);
+    }
 }
+
