@@ -5,4 +5,6 @@ import com.sprint.project1.hrbank.dto.employee.EmployeeResponse;
 
 public interface EmployeeService {
   EmployeeResponse createEmployee(EmployeeCreateRequest request);
+
+  void deleteEmployee(Long id);
 }

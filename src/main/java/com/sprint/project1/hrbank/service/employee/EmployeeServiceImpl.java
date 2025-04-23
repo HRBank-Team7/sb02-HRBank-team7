@@ -7,6 +7,7 @@ import com.sprint.project1.hrbank.entity.employee.Employee;
 import com.sprint.project1.hrbank.mapper.employee.EmployeeMapper;
 import com.sprint.project1.hrbank.repository.department.DepartmentRepository;
 import com.sprint.project1.hrbank.repository.employee.EmployeeRepository;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +35,14 @@ public class EmployeeServiceImpl implements EmployeeService{
     employee.generateEmployeeNumber();
     Employee createdEmployee = employeeRepository.save(employee);
     return employeeMapper.toResponse(createdEmployee);
+  }
+
+
+  @Override
+  public void deleteEmployee(Long employeeId) {
+    Employee employee = employeeRepository.findById(employeeId)
+        .orElseThrow(() -> new NoSuchElementException("Employee not found for id: " + employeeId));
+    employeeRepository.delete(employee);
   }
 
 }
