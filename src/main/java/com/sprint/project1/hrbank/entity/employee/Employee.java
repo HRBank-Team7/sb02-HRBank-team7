@@ -1,5 +1,6 @@
 package com.sprint.project1.hrbank.entity.employee;
 
+import com.sprint.project1.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.sprint.project1.hrbank.entity.base.BaseTimeEntity;
 import com.sprint.project1.hrbank.entity.department.Department;
 import com.sprint.project1.hrbank.entity.file.File;
@@ -11,16 +12,20 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+import org.springframework.stereotype.Service;
 
+@Setter
 @Getter
+@Service
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -48,12 +53,46 @@ public class Employee extends BaseTimeEntity {
   private String position;
 
   @Column(nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
-  private Instant hireDate;
+  private LocalDate hireDate;
 
   @Column
   @Enumerated(EnumType.STRING)
   @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-  private EmployeeStatus status;
+  private EmployeeStatus status = EmployeeStatus.ACTIVE;
+
+  // 사번 생성
+  public void generateEmployeeNumber(){
+    LocalDateTime now = LocalDateTime.now();
+    String date = now.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+    String num = now.format(DateTimeFormatter.ofPattern("HHmmss"));
+    this.employeeNumber = String.format("EMP-%s-%s",date, num);
+  }
+
+  public void assignDepartment(Department department){
+    this.department = department;
+  }
+
+  public Employee update(EmployeeUpdateRequest request, Department department, File file){
+    if(request.name()!=null && !this.name.equals(request.name())) {
+      this.name = request.name();
+    }
+    if(request.email()!=null && !this.email.equals(request.email())){
+      this.email = request.email();
+    }
+    if(request.position()!=null && !this.position.equals(request.position())){
+      this.position = request.position();
+    }
+    if(request.hireDate()!=null && !this.hireDate.equals(request.hireDate())){
+      this.hireDate = request.hireDate();
+    }
+    if(request.status()!=null && !this.status.equals(request.status())){
+      this.status = request.status();
+    }
+//    if(request.departmentId()!=null && !this.department.getId().equals(request.departmentId()){
+//
+//    }
+
+    return this;
+  }
 
 }

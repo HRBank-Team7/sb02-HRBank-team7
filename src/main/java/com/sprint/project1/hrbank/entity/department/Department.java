@@ -1,17 +1,16 @@
 package com.sprint.project1.hrbank.entity.department;
 
 import com.sprint.project1.hrbank.entity.base.BaseTimeEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-import java.time.LocalDate;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import java.time.Instant;
+import lombok.Setter;
 
+@Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,7 +22,6 @@ public class Department extends BaseTimeEntity {
   private String name;
 
   @Column(nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
   private Instant establishedDate;
 
   @Column
