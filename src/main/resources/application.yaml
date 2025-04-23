@@ -17,7 +17,7 @@ spring:
       idle-timeout: 60000
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
 
     defer-datasource-initialization: true
     show-sql: false
@@ -51,3 +51,9 @@ springdoc:
     path: /swagger-ui.html
     csrf:
       enabled: true
+
+hrbank:
+  storage:
+    type: local
+    local:
+      root-path: ./local-storages
