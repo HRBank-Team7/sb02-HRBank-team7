@@ -19,4 +19,6 @@ public interface EmployeeService {
   List<EmployeeTrendResponse> getEmployeeTrend(LocalDate from, LocalDate to, String unit);
 
   List<EmployeeDistributionResponse> getEmployeeDistribution(String groupBy, EmployeeStatus status);
+
+  Long getEmployeeByCount(EmployeeStatus status, LocalDate fromDate, LocalDate toDate);
 }
