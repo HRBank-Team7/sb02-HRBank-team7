@@ -12,7 +12,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import java.time.Instant;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -20,27 +19,77 @@ import org.hibernate.type.SqlTypes;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "backups")
 public class Backup extends BaseEntity {
-  @Column(nullable = false)
-  String worker;
+  @Column(length = 50, nullable = false)
+  private String worker;
 
   @Column(nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
-  Instant startedAt;
+  private Instant startedAt;
 
-  @Column(nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
-  Instant endedAt;
+  @Column(nullable = true)
+  private Instant endedAt;
 
-  @Column(nullable = false)
+  @Column(length = 20, nullable = false)
   @Enumerated(value = EnumType.STRING)
   @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-  BackupStatus status;
+  private BackupStatus status;
 
   @OneToOne
   @JoinColumn(name = "file_id")
-  File file;
+  private File file;
+
+  public Backup(String worker) {
+    this.worker = worker;
+    start();
+  }
+
+  public void start() {
+    this.status = BackupStatus.IN_PROGRESS;
+    this.startedAt = Instant.now();
+    this.endedAt = null;
+    this.file = null;
+  }
+
+  public void complete(File completedFile) {
+    if (this.status != BackupStatus.IN_PROGRESS) {
+       throw new IllegalStateException("백업 이력은 진행중 상태에서만 완료될 수 있습니다.");
+    }
+    this.status = BackupStatus.COMPLETED;
+    this.endedAt = Instant.now();
+    this.file = completedFile;
+  }
+
+  public void fail(File errorLogFile) {
+    if (this.status != BackupStatus.IN_PROGRESS) {
+       throw new IllegalStateException("백업 이력은 진행중 상태에서만 실패될 수 있습니다.");
+    }
+    this.status = BackupStatus.FAILED;
+    this.endedAt = Instant.now();
+    this.file = errorLogFile;
+  }
+
+  public void skip() {
+    this.status = BackupStatus.SKIPPED;
+    this.endedAt = Instant.now();
+    this.file = null;
+  }
+
+  public void updateWorker(String worker) {
+    this.worker = worker;
+  }
+
+  public void updateStartedAt(Instant startedAt) {
+    this.startedAt = startedAt;
+  }
+
+  public void updateEndedAt(Instant endedAt) {
+    this.endedAt = endedAt;
+  }
+
+  public void updateStatus(BackupStatus status) {
+    this.status = status;
+  }
 }
