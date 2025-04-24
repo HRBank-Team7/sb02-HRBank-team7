@@ -52,7 +52,7 @@ public class EmployeeServiceImpl implements EmployeeService{
             return fileService.create(new FileCreateRequest(
                 p.getOriginalFilename(),
                 p.getContentType(),
-                p.getSize(),
+                (long) p.getBytes().length,
                 p.getBytes()
             ));
           } catch (IOException e) {
@@ -91,7 +91,7 @@ public class EmployeeServiceImpl implements EmployeeService{
             return fileService.create(new FileCreateRequest(
                 p.getOriginalFilename(),
                 p.getContentType(),
-                p.getSize(),
+                (long) p.getBytes().length,
                 p.getBytes()
             ));
           } catch (IOException e) {
