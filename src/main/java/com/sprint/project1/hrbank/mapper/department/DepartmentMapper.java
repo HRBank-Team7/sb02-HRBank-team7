@@ -1,5 +1,6 @@
 package com.sprint.project1.hrbank.mapper.department;
 
+import com.sprint.project1.hrbank.dto.department.DepartmentCreateRequest;
 import com.sprint.project1.hrbank.dto.department.DepartmentResponse;
 import com.sprint.project1.hrbank.entity.department.Department;
 import org.mapstruct.Mapper;
@@ -14,12 +15,6 @@ import java.time.ZoneId;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface DepartmentMapper {
 
-    @Mapping(target = "establishedDate", source = "department.establishedDate", qualifiedByName = "changeLocalDateInSeoul")
     DepartmentResponse toResponse(Department department, long employeeCount);
 
-
-    @Named("changeLocalDateInSeoul")
-    static LocalDate changeLocalDateInSeoul(Instant establishedDate) {
-        return establishedDate.atZone(ZoneId.of("Asia/Seoul")).toLocalDate();
-    }
 }

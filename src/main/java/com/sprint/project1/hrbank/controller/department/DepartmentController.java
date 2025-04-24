@@ -20,6 +20,12 @@ public class DepartmentController {
         return ResponseEntity.ok().body(response);
     }
 
+    @GetMapping("/{departmentId}")
+    public ResponseEntity<DepartmentResponse> getDepartment(@PathVariable Long departmentId) {
+        DepartmentResponse response = departmentService.getDepartment(departmentId);
+        return ResponseEntity.ok().body(response);
+    }
+
     @PatchMapping("/{departmentId}")
     public ResponseEntity<DepartmentResponse> updateDepartment(@PathVariable Long departmentId, @RequestBody DepartmentUpdateRequest request) {
         DepartmentResponse response = departmentService.updateDepartment(departmentId, request);

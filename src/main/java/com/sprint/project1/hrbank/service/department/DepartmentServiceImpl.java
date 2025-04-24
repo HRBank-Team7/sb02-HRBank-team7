@@ -35,6 +35,15 @@ public class DepartmentServiceImpl implements DepartmentService {
 
 
     @Override
+    public DepartmentResponse getDepartment(Long departmentId) {
+        Department department = departmentRepository.findById(departmentId)
+            .orElseThrow(() -> new NoSuchElementException("department not found" + departmentId));
+
+        long employeeCount = getEmployeeCountBy(department);
+        return departmentMapper.toResponse(department, employeeCount);
+    }
+
+    @Override
     public DepartmentResponse updateDepartment(Long departmentId, DepartmentUpdateRequest updateRequest) {
         Department department = departmentRepository.findById(departmentId)
                 .orElseThrow(() -> new NoSuchElementException("department not found" + departmentId));

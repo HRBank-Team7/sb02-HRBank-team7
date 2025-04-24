@@ -6,6 +6,7 @@ import com.sprint.project1.hrbank.dto.department.DepartmentUpdateRequest;
 
 public interface DepartmentService {
     DepartmentResponse createDepartment(DepartmentCreateRequest createRequest);
+    DepartmentResponse getDepartment(Long departmentId);
     DepartmentResponse updateDepartment(Long departmentId, DepartmentUpdateRequest updateRequest);
     void deleteDepartment(Long departmentId);
 }

@@ -5,6 +5,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +23,7 @@ public class Department extends BaseTimeEntity {
   private String name;
 
   @Column(nullable = false)
-  private Instant establishedDate;
+  private LocalDate establishedDate;
 
   @Column
   private String description;
@@ -37,7 +38,7 @@ public class Department extends BaseTimeEntity {
     }
   }
 
-  public void update(String name, Instant establishedDate, String description) {
+  public void update(String name, LocalDate establishedDate, String description) {
     if (name != null || !name.equals(this.name)) {
       this.name = name;
     }
