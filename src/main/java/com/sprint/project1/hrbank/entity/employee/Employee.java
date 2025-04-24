@@ -15,6 +15,9 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -73,22 +76,22 @@ public class Employee extends BaseTimeEntity {
   }
 
   public Employee update(EmployeeUpdateRequest request, Department department /*File file*/){
-    if(request.name()!=null && !this.name.equals(request.name())) {
+    if(request.name()!=null && !request.name().equals(this.name)) {
       this.name = request.name();
     }
-    if(request.email()!=null && !this.email.equals(request.email())){
+    if(request.email()!=null && !request.email().equals(this.email)){
       this.email = request.email();
     }
-    if(request.position()!=null && !this.position.equals(request.position())){
+    if(request.position()!=null && !request.position().equals(this.position)){
       this.position = request.position();
     }
-    if(request.hireDate()!=null && !this.hireDate.equals(request.hireDate())){
+    if(request.hireDate()!=null && !request.hireDate().equals(this.hireDate)){
       this.hireDate = request.hireDate();
     }
-    if(request.status()!=null && !this.status.equals(request.status())){
+    if(request.status()!=null && !request.status().equals(this.status)){
       this.status = request.status();
     }
-    if(request.departmentId()!=null && !this.department.getId().equals(request.departmentId())){
+    if(request.departmentId() != null && !request.departmentId().equals(this.department.getId())){
       this.department = department;
     }
 //     file 나중에 해야함
@@ -98,4 +101,27 @@ public class Employee extends BaseTimeEntity {
     return this;
   }
 
+  // 대시 보드 trend 날짜 지정
+  public static List<LocalDate> generateDatePointTrend(LocalDate from, LocalDate to, String unit) {
+    List<LocalDate> datePoints = new ArrayList<>();
+
+    ChronoUnit chronoUnit;
+    switch (unit) {
+      case "day" -> chronoUnit = ChronoUnit.DAYS;
+      case "week" -> chronoUnit = ChronoUnit.WEEKS;
+      case "month" -> chronoUnit = ChronoUnit.MONTHS;
+      case "quarter" -> chronoUnit = ChronoUnit.MONTHS;
+      case "year" -> chronoUnit = ChronoUnit.YEARS;
+      default -> throw new IllegalArgumentException("Unsupported unit: " + unit);
+    }
+    int uniSize = unit.equals("quarter") ? 3 : 1;
+
+    LocalDate end = (to != null) ? to : LocalDate.now();
+    LocalDate start = (from != null) ? from : end.minus(uniSize * 12, chronoUnit);
+
+    for (LocalDate date = start; !date.isAfter(end); date = date.plus(uniSize, chronoUnit)) {
+      datePoints.add(date);
+    }
+    return datePoints;
+  }
 }
