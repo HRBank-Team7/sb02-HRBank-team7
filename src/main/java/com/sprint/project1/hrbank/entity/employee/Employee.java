@@ -98,11 +98,8 @@ public class Employee extends BaseTimeEntity {
     if(request.departmentId() != null && !request.departmentId().equals(this.department.getId())){
       this.department = department;
     }
-    if(file != null && this.file!=file){
-      this.file = file;
-    } else {
-      this.file = file;
-    }
+    this.file = file;
+
     return this;
   }
 
