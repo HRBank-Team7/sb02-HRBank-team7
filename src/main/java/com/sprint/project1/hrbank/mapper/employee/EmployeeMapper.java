@@ -15,6 +15,7 @@ public interface EmployeeMapper {
   @Mapping(target = "status", source = "status", qualifiedByName = "explainStatus")
   @Mapping(target = "departmentId", source = "department.id")
   @Mapping(target = "departmentName", source = "department.name")
+  @Mapping(target = "profileImageId", source = "file.id")
   EmployeeResponse toResponse(Employee entity);
 
   Employee toEntity(EmployeeResponse response);
@@ -23,7 +24,6 @@ public interface EmployeeMapper {
   @Mapping(target = "file", ignore = true)
   Employee toEntity(EmployeeCreateRequest request);
 
-  
   @Named("explainStatus")
   static String toKorean(EmployeeStatus status) {
     return EmployeeStatus.explainStatus(status);

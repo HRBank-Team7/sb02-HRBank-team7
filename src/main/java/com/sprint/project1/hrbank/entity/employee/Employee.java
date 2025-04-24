@@ -75,7 +75,11 @@ public class Employee extends BaseTimeEntity {
     this.department = department;
   }
 
-  public Employee update(EmployeeUpdateRequest request, Department department /*File file*/){
+  public void assignFile(File file) {
+    this.file = file;
+  }
+
+  public Employee update(EmployeeUpdateRequest request, Department department, File file){
     if(request.name()!=null && !request.name().equals(this.name)) {
       this.name = request.name();
     }
@@ -94,10 +98,8 @@ public class Employee extends BaseTimeEntity {
     if(request.departmentId() != null && !request.departmentId().equals(this.department.getId())){
       this.department = department;
     }
-//     file 나중에 해야함
-//    if(file != null && this.file!=file){
-//      this.file = file;
-//    }
+    this.file = file;
+
     return this;
   }
 
