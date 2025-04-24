@@ -68,7 +68,6 @@ public class EmployeeServiceImpl implements EmployeeService{
 
     // profile 로직 추가
 
-    // 이메일 중복 안되게 하는 로직 추가 필요
     Employee updateEmployee = employee.update(request, department);
     Employee createdEmployee = employeeRepository.save(updateEmployee);
     return employeeMapper.toResponse(createdEmployee);
@@ -115,5 +114,22 @@ public class EmployeeServiceImpl implements EmployeeService{
       result.add(new EmployeeDistributionResponse(groupKey, count, percentage));
     }
     return result;
+  }
+
+  @Override
+  public Long getEmployeeByCount(EmployeeStatus status, LocalDate fromDate, LocalDate toDate) {
+    if (fromDate == null) { // from 이 null 이고
+      return (status == null) // status(재직 상태) 이 null 이면
+          ? employeeRepository.count() // 재직 수 전체 return
+          : employeeRepository.countAllEmployeesWithStatus(status);
+          // status(재직 상태) 있다면 상태에 따른 직원 수 return
+    }
+
+    // toDate 없으면 default 현재 일시
+    LocalDate endToDate = (toDate != null) ? toDate : LocalDate.now();
+
+    return (status == null)
+        ? employeeRepository.countEmployeesByHireDate(fromDate, endToDate)
+        : employeeRepository.countEmployeesByHireDateWithStatus(status, fromDate, endToDate);
   }
 }

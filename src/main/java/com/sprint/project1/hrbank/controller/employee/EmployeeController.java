@@ -56,7 +56,7 @@ public  class EmployeeController {
     EmployeeResponse employeeResponse = employeeService.updateEmployee(id, request /*,profile*/);
     return ResponseEntity.ok(employeeResponse);
   }
-
+  
   @GetMapping("/stats/trend")
   public ResponseEntity<List<EmployeeTrendResponse>> getEmployeeTrend(
       @RequestParam(required = false) LocalDate from,
@@ -76,5 +76,15 @@ public  class EmployeeController {
         employeeService.getEmployeeDistribution(groupBy, status);
 
     return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/count")
+  public ResponseEntity<Long> getEmployeeCount(
+      @RequestParam(required = false) EmployeeStatus status,
+      @RequestParam(required = false) LocalDate fromDate,
+      @RequestParam(required = false) LocalDate toDate
+  ){
+    Long employeeCount = employeeService.getEmployeeByCount(status, fromDate, toDate);
+    return ResponseEntity.ok(employeeCount);
   }
 }
