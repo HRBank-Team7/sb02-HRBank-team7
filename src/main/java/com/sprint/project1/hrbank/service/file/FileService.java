@@ -7,6 +7,7 @@ import org.springframework.core.io.Resource;
 
 public interface FileService {
     File create(FileCreateRequest request);
+    File create(FileCreateRequest request, String filePath);
     Resource download (Long fileId);
     FileMetadata getMetadata(Long fileId);
 }

@@ -44,6 +44,17 @@ public class LocalFileStorage implements FileStorage {
     }
 
     @Override
+    public void put(String filename, byte[] bytes) {
+        Path path = resolvePath(filename);
+        try {
+            Files.createDirectories(path.getParent());
+            Files.write(path, bytes);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write file: " + path, e);
+        }
+    }
+
+    @Override
     public InputStream get(Long fileId) {
         Path path = resolvePath(fileId);
         try{
@@ -63,5 +74,8 @@ public class LocalFileStorage implements FileStorage {
 
     private Path resolvePath(Long fileId) {
         return root.resolve(fileId.toString());
+    }
+    private Path resolvePath(String filename) {
+        return root.resolve(filename);
     }
 }
