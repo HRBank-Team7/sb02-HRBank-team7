@@ -11,7 +11,7 @@ CREATE TABLE departments (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
     description TEXT,
-    established_date TIMESTAMPTZ NOT NULL,
+    established_date DATE NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -25,7 +25,7 @@ CREATE TABLE employees(
     employee_number VARCHAR(50) NOT NULL UNIQUE,
     department_id BIGINT NOT NULL,
     position VARCHAR(100) NOT NULL,
-    hire_date TIMESTAMPTZ NOT NULL,
+    hire_date DATE NOT NULL,
     status employee_status DEFAULT 'ACTIVE',
     profile_image_id BIGINT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
