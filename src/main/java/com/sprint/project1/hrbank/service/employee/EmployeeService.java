@@ -8,13 +8,14 @@ import com.sprint.project1.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.sprint.project1.hrbank.entity.employee.EmployeeStatus;
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface EmployeeService {
-  EmployeeResponse createEmployee(EmployeeCreateRequest request);
+  EmployeeResponse createEmployee(EmployeeCreateRequest request, MultipartFile profile);
 
   void deleteEmployee(Long id);
 
-  EmployeeResponse updateEmployee(Long id, EmployeeUpdateRequest request);
+  EmployeeResponse updateEmployee(Long id, EmployeeUpdateRequest request, MultipartFile profile);
 
   List<EmployeeTrendResponse> getEmployeeTrend(LocalDate from, LocalDate to, String unit);
 

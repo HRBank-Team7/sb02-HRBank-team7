@@ -5,12 +5,16 @@ import com.sprint.project1.hrbank.dto.employee.EmployeeDistributionResponse;
 import com.sprint.project1.hrbank.dto.employee.EmployeeResponse;
 import com.sprint.project1.hrbank.dto.employee.EmployeeTrendResponse;
 import com.sprint.project1.hrbank.dto.employee.EmployeeUpdateRequest;
+import com.sprint.project1.hrbank.dto.file.FileCreateRequest;
 import com.sprint.project1.hrbank.entity.department.Department;
 import com.sprint.project1.hrbank.entity.employee.Employee;
 import com.sprint.project1.hrbank.entity.employee.EmployeeStatus;
+import com.sprint.project1.hrbank.entity.file.File;
 import com.sprint.project1.hrbank.mapper.employee.EmployeeMapper;
 import com.sprint.project1.hrbank.repository.department.DepartmentRepository;
 import com.sprint.project1.hrbank.repository.employee.EmployeeRepository;
+import com.sprint.project1.hrbank.service.file.FileService;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -18,8 +22,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -27,10 +33,11 @@ public class EmployeeServiceImpl implements EmployeeService{
 
   private final EmployeeRepository employeeRepository;
   private final DepartmentRepository departmentRepository;
+  private final FileService fileService;
   private final EmployeeMapper employeeMapper;
 
   @Override
-  public EmployeeResponse createEmployee(EmployeeCreateRequest request) {
+  public EmployeeResponse createEmployee(EmployeeCreateRequest request, MultipartFile profile) {
     Department department = departmentRepository.findById(request.departmentId())
         .orElseThrow(() -> new RuntimeException("Department not found"));
 
@@ -38,10 +45,25 @@ public class EmployeeServiceImpl implements EmployeeService{
       throw new IllegalArgumentException("Email already exists");
     }
 
-    // profile 로직 추가
+    File file = Optional.ofNullable(profile)
+        .filter(p -> !p.isEmpty())
+        .map(p -> {
+          try {
+            return fileService.create(new FileCreateRequest(
+                p.getOriginalFilename(),
+                p.getContentType(),
+                p.getSize(),
+                p.getBytes()
+            ));
+          } catch (IOException e) {
+            throw new RuntimeException("Failed to process profile file", e);
+          }
+        })
+        .orElse(null);
 
     Employee employee = employeeMapper.toEntity(request);
     employee.assignDepartment(department);
+    employee.assignFile(file);
     employee.generateEmployeeNumber();
     Employee createdEmployee = employeeRepository.save(employee);
     return employeeMapper.toResponse(createdEmployee);
@@ -55,20 +77,34 @@ public class EmployeeServiceImpl implements EmployeeService{
   }
 
   @Override
-  public EmployeeResponse updateEmployee(Long employeeId, EmployeeUpdateRequest request) {
+  public EmployeeResponse updateEmployee(Long employeeId, EmployeeUpdateRequest request, MultipartFile profile) {
     Department department = departmentRepository.findById(request.departmentId())
         .orElseThrow(() -> new NoSuchElementException("Department not found for id: " + request.departmentId()));
 
     Employee employee = employeeRepository.findById(employeeId)
         .orElseThrow(() -> new NoSuchElementException("Employee not found for id: " + employeeId));
 
-    if (employeeRepository.existsByEmail(request.email())) {
-      throw new IllegalArgumentException("Email already exists");
-    }
+    File file = Optional.ofNullable(profile)
+        .filter(p -> !p.isEmpty())
+        .map(p -> {
+          try {
+            return fileService.create(new FileCreateRequest(
+                p.getOriginalFilename(),
+                p.getContentType(),
+                p.getSize(),
+                p.getBytes()
+            ));
+          } catch (IOException e) {
+            throw new RuntimeException("Failed to process profile file", e);
+          }
+        })
+        .orElse(null);
 
-    // profile 로직 추가
+    if (!employee.getEmail().equals(request.email())) {
+      if (employeeRepository.existsByEmail(request.email())){
+        throw new IllegalArgumentException("Email already exists");}}
 
-    Employee updateEmployee = employee.update(request, department);
+    Employee updateEmployee = employee.update(request, department, file);
     Employee createdEmployee = employeeRepository.save(updateEmployee);
     return employeeMapper.toResponse(createdEmployee);
   }

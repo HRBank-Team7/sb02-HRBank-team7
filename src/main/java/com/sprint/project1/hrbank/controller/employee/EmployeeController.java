@@ -35,7 +35,7 @@ public  class EmployeeController {
       @RequestPart(value = "employee") EmployeeCreateRequest request,
       @RequestPart(value = "profile", required = false) MultipartFile profile
   ) {
-    EmployeeResponse employeeResponseResponse = employeeService.createEmployee(request);
+    EmployeeResponse employeeResponseResponse = employeeService.createEmployee(request, profile);
     return ResponseEntity.ok(employeeResponseResponse);
   }
 
@@ -53,7 +53,7 @@ public  class EmployeeController {
       @RequestPart(value = "employee") EmployeeUpdateRequest request,
       @RequestPart(value = "profile", required = false) MultipartFile profile //파일 나중에 처리 해야함
   ) {
-    EmployeeResponse employeeResponse = employeeService.updateEmployee(id, request /*,profile*/);
+    EmployeeResponse employeeResponse = employeeService.updateEmployee(id, request, profile);
     return ResponseEntity.ok(employeeResponse);
   }
   
