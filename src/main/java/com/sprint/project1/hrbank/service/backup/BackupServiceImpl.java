@@ -6,6 +6,8 @@ import com.sprint.project1.hrbank.entity.backup.Backup;
 import com.sprint.project1.hrbank.entity.backup.BackupStatus;
 import com.sprint.project1.hrbank.entity.employee.Employee;
 import com.sprint.project1.hrbank.entity.file.File;
+import com.sprint.project1.hrbank.exception.backup.BackupFailureException;
+import com.sprint.project1.hrbank.exception.backup.BackupInProgressException;
 import com.sprint.project1.hrbank.infrastructure.EmployeeCsvGenerator;
 import com.sprint.project1.hrbank.infrastructure.ErrorLogWriter;
 import com.sprint.project1.hrbank.mapper.backup.BackupMapper;
@@ -16,17 +18,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -56,13 +50,11 @@ public class BackupServiceImpl implements BackupService {
   @Transactional
   public BackupDto triggerManualBackup(String workerIp) {
     backupRepository.findTopByStatus(BackupStatus.IN_PROGRESS).ifPresent(b -> {
-      throw new IllegalStateException("이미 진행중인 백업 작업이 존재합니다.");
+      throw new BackupInProgressException();
     });
 
-    Optional<Instant> optionalLastBackupTime = backupRepository.findTopByStatusOrderByEndedAtDesc(BackupStatus.COMPLETED)
-        .map(Backup::getEndedAt);
-    Instant lastBackupTime = optionalLastBackupTime.orElse(Instant.EPOCH);
-
+    Instant lastBackupTime = backupRepository.findTopByStatusOrderByEndedAtDesc(BackupStatus.COMPLETED)
+        .map(Backup::getEndedAt).orElse(Instant.EPOCH);
     boolean needsBackup = employeeRepository.existsByUpdatedAtAfter(lastBackupTime);
 
     Backup backup = new Backup(workerIp);
@@ -75,39 +67,47 @@ public class BackupServiceImpl implements BackupService {
     }
 
     try {
-      List<Employee> employees = employeeRepository.findAll();
-      String csvFilename = "backups/employee_backup_" + System.currentTimeMillis() + ".csv";
-      byte[] csvBytes = employeeCsvGenerator.generateCsvBytes(employees);
-
-      FileCreateRequest request = new FileCreateRequest(
-          csvFilename,
-          "text/csv",
-          (long) csvBytes.length,
-          csvBytes
-      );
-      File savedFile = fileService.create(request, csvFilename);
-      backup.complete(savedFile);
-      log.info("Backup completed successfully: {}", savedFile.getName());
-
+      performBackup(backup);
     } catch (Exception ex) {
-      log.error("Backup failed", ex);
-      try {
-        byte[] errorBytes = errorLogWriter.generateLogBytes(ex);
-        String logFilename = "logs/backup_error_" + System.currentTimeMillis() + ".log";
-
-        FileCreateRequest errorRequest = new FileCreateRequest(
-            logFilename,
-            "text/plain",
-            (long) errorBytes.length,
-            errorBytes
-        );
-        File errorLog = fileService.create(errorRequest, logFilename);
-        backup.fail(errorLog);
-      } catch (IOException ioEx) {
-        throw new RuntimeException("로그 파일 저장 중 오류 발생", ioEx);
-      }
+      handleBackupFailure(backup, ex);
+      throw new BackupFailureException("백업 중 예외 발생,", ex);
     }
 
     return backupMapper.toDto(backup);
+  }
+
+  private void performBackup(Backup backup) throws IOException {
+    List<Employee> employees = employeeRepository.findAll();
+    String csvFilename = "backups/employee_backup_" + System.currentTimeMillis() + ".csv";
+    byte[] csvBytes = employeeCsvGenerator.generateCsvBytes(employees);
+
+    FileCreateRequest request = new FileCreateRequest(
+        csvFilename,
+        "text/csv",
+        (long) csvBytes.length,
+        csvBytes
+    );
+    File savedFile = fileService.create(request, csvFilename);
+    backup.complete(savedFile);
+    log.info("Backup completed successfully: {}", savedFile.getName());
+  }
+
+  private void handleBackupFailure(Backup backup, Exception ex) {
+    log.error("Backup failed", ex);
+    try {
+      byte[] errorBytes = errorLogWriter.generateLogBytes(ex);
+      String logFilename = "logs/backup_error_" + System.currentTimeMillis() + ".log";
+
+      FileCreateRequest errorRequest = new FileCreateRequest(
+          logFilename,
+          "text/plain",
+          (long) errorBytes.length,
+          errorBytes
+      );
+      File errorLog = fileService.create(errorRequest, logFilename);
+      backup.fail(errorLog);
+    } catch (IOException ioEx) {
+      throw new RuntimeException("로그 파일 저장 중 오류 발생", ioEx);
+    }
   }
 }
