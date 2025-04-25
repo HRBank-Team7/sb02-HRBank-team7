@@ -9,4 +9,5 @@ public interface FileStorage {
     void put(String filename, byte[] bytes);
     InputStream get(Long fileId);
     Resource download(Long fileId);
+    void delete(Long fileId);
 }

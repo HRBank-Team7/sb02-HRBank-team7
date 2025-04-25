@@ -10,4 +10,5 @@ public interface FileService {
     File create(FileCreateRequest request, String filePath);
     Resource download (Long fileId);
     FileMetadata getMetadata(Long fileId);
+    void delete(Long fileId);
 }

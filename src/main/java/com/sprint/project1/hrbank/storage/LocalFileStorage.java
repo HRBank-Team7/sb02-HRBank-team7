@@ -28,7 +28,7 @@ public class LocalFileStorage implements FileStorage {
         try {
             Files.createDirectories(root);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to create directory: " + root, e);
+            throw new RuntimeException("디렉토리 생성에 실패하였습니다.: " + root, e);
         }
     }
 
@@ -39,7 +39,7 @@ public class LocalFileStorage implements FileStorage {
             Files.write(path, bytes);
             return fileId;
         }catch (IOException e){
-            throw new RuntimeException("Failed to write file: " + path, e);
+            throw new RuntimeException("파일 작성에 실패하였습니다.: " + path, e);
         }
     }
 
@@ -50,7 +50,7 @@ public class LocalFileStorage implements FileStorage {
             Files.createDirectories(path.getParent());
             Files.write(path, bytes);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to write file: " + path, e);
+            throw new RuntimeException("파일 작성에 실패하였습니다.: " + path, e);
         }
     }
 
@@ -59,8 +59,8 @@ public class LocalFileStorage implements FileStorage {
         Path path = resolvePath(fileId);
         try{
             return Files.newInputStream(path);
-        }catch(IOException e){
-            throw new RuntimeException("Failed to read file: " + path, e);
+        } catch (IOException e) {
+            throw new RuntimeException("파일 읽기에 실패하였습니다.: " + path, e);
         }
     }
 
@@ -70,6 +70,15 @@ public class LocalFileStorage implements FileStorage {
         Resource resource = new InputStreamResource(inputStream);
 
         return resource;
+    }
+
+    @Override
+    public void delete(Long fileId) {
+        try {
+            Files.deleteIfExists(resolvePath(fileId));
+        } catch (IOException e) {
+            throw new RuntimeException("파일 삭제에 실패하였습니다.:" + e);
+        }
     }
 
     private Path resolvePath(Long fileId) {

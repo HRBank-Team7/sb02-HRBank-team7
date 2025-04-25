@@ -33,4 +33,9 @@ public class FileController {
                 .body(resource);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTest(@PathVariable Long id) {
+        fileService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 }
