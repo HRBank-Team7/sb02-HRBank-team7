@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
-@RestControllerAdvice(basePackages = "com.sprint.project1.hrbank.service.backup")
+@RestControllerAdvice(basePackages = "com.sprint.project1.hrbank")
 public class BackupExceptionHandler {
 
   @ExceptionHandler(BackupInProgressException.class)
