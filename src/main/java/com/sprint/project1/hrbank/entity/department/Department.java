@@ -1,10 +1,10 @@
 package com.sprint.project1.hrbank.entity.department;
 
 import com.sprint.project1.hrbank.entity.base.BaseTimeEntity;
+import com.sprint.project1.hrbank.exception.department.DuplicateDepartmentException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import java.time.Instant;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,7 +34,7 @@ public class Department extends BaseTimeEntity {
     }
 
     if (this.name.equals(other.getName())) {
-      throw new IllegalArgumentException("중복된 부서 이름입니다");
+      throw new DuplicateDepartmentException("중복된 부서 이름입니다");
     }
   }
 
