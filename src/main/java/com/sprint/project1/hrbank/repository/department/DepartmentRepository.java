@@ -55,7 +55,6 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
        AND d.name < :cursorName
     ORDER BY d.name Desc
     """)
-
     List<Department> findNextPageByNameDesc(@Param("keyword") String keyword, @Param("cursorName") String cursorName, Pageable pageable);
 
     @Query("""
