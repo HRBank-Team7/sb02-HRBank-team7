@@ -1,11 +1,14 @@
 package com.sprint.project1.hrbank.controller.department;
 
 import com.sprint.project1.hrbank.dto.department.DepartmentCreateRequest;
+import com.sprint.project1.hrbank.dto.department.DepartmentPageResponse;
 import com.sprint.project1.hrbank.dto.department.DepartmentResponse;
+import com.sprint.project1.hrbank.dto.department.DepartmentSearchRequest;
 import com.sprint.project1.hrbank.dto.department.DepartmentUpdateRequest;
 import com.sprint.project1.hrbank.service.department.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,6 +26,13 @@ public class DepartmentController {
     @GetMapping("/{departmentId}")
     public ResponseEntity<DepartmentResponse> getDepartment(@PathVariable Long departmentId) {
         DepartmentResponse response = departmentService.getDepartment(departmentId);
+        return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<DepartmentPageResponse> getDepartmentPage(
+        @Validated @ModelAttribute DepartmentSearchRequest request) {
+        DepartmentPageResponse response = departmentService.getDepartmentPage(request);
         return ResponseEntity.ok().body(response);
     }
 
