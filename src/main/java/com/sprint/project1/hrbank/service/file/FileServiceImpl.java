@@ -8,10 +8,10 @@ import com.sprint.project1.hrbank.repository.file.FileRepository;
 import com.sprint.project1.hrbank.storage.FileStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,11 +21,23 @@ public class FileServiceImpl implements FileService {
     private final FileStorage fileStorage;
 
     @Override
+    @Transactional
     public File create(FileCreateRequest request) {
         File file = new File(request.name(), request.type(), request.size());
         fileRepository.save(file);
         fileStorage.put(file.getId(), request.bytes());
 
+        return file;
+    }
+
+    @Override
+    @Transactional
+    public File create(FileCreateRequest request, String filePath) {
+        File file = new File(request.name(), request.type(), request.size());
+        fileRepository.save(file);
+        if (request.bytes() != null) {
+            fileStorage.put(filePath, request.bytes());
+        }
         return file;
     }
 
