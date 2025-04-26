@@ -7,11 +7,13 @@ import lombok.Builder;
 @Builder
 public record BackupPagingRequest(
     String worker,
-    Instant startedFrom,
-    Instant startedTo,
+    Instant startedAtFrom,
+    Instant startedAtTo,
     BackupStatus status,
-    BackupSortBy sortBy,
     Integer size,
-    String cursor
+    Long idAfter,
+    String cursor,
+    BackupSortField sortField,
+    BackupSortDirection sortDirection
 ) {
 }
