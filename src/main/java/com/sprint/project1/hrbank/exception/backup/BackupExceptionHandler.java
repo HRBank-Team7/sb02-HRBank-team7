@@ -44,4 +44,18 @@ public class BackupExceptionHandler {
         .internalServerError()
         .body(ErrorResponse.of("BACKUP_ERROR", ex.getMessage()));
   }
+
+  @ExceptionHandler(BackupGenerationException.class)
+  public ResponseEntity<ErrorResponse> handleBackupGeneration(BackupGenerationException ex) {
+    return ResponseEntity
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(ErrorResponse.of("BACKUP_GENERATION_ERROR", ex.getMessage()));
+  }
+
+  @ExceptionHandler(BackupFileStorageException.class)
+  public ResponseEntity<ErrorResponse> handleBackupFileStorage(BackupFileStorageException ex) {
+    return ResponseEntity
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(ErrorResponse.of("BACKUP_FILE_STORAGE_ERROR", ex.getMessage()));
+  }
 }
