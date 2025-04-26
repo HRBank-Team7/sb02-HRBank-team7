@@ -15,6 +15,6 @@ public record BackupPagingRequest(
     BackupStatus status,
     BackupSortBy sortBy,
     Integer size,
-    Long cursor
+    String cursor
 ) {
 }

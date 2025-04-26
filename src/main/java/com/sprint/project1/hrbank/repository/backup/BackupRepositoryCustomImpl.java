@@ -1,6 +1,9 @@
 package com.sprint.project1.hrbank.repository.backup;
 
+import static com.sprint.project1.hrbank.util.CursorManager.decode;
+
 import com.sprint.project1.hrbank.dto.backup.BackupPagingRequest;
+import com.sprint.project1.hrbank.dto.backup.BackupSortBy;
 import com.sprint.project1.hrbank.entity.backup.Backup;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -39,16 +42,18 @@ public class BackupRepositoryCustomImpl implements BackupRepositoryCustom {
       predicates.add(cb.equal(backup.get("status"), request.status()));
     }
     if (request.cursor() != null) {
-      predicates.add(cb.lessThan(backup.get("id"), request.cursor()));
+      Long decodedId = decode(request.cursor());
+      predicates.add(cb.lessThan(backup.get("id"), decodedId));
     }
 
     query.where(cb.and(predicates.toArray(new Predicate[0])));
 
-    if ("endedAt".equals(request.sortBy() != null ? request.sortBy().name() : null)) {
+    if (request.sortBy() == BackupSortBy.ENDED_AT) {
       query.orderBy(cb.desc(backup.get("endedAt")));
     } else {
       query.orderBy(cb.desc(backup.get("startedAt")));
     }
+
 
     TypedQuery<Backup> typedQuery = em.createQuery(query);
     typedQuery.setMaxResults(request.size());
