@@ -15,4 +15,11 @@ public class FileExceptionHandler {
         .status(HttpStatus.NOT_FOUND)
         .body(ErrorResponse.of("FILE_NOT_FOUND", ex.getMessage()));
   }
+
+  @ExceptionHandler(FileException.class)
+  public ResponseEntity<ErrorResponse> handleFileGeneric(FileException ex){
+    return ResponseEntity
+        .internalServerError()
+        .body(ErrorResponse.of("FILE_ERROR", ex.getMessage()));
+  }
 }

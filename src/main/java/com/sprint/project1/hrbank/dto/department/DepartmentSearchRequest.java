@@ -1,8 +1,5 @@
 package com.sprint.project1.hrbank.dto.department;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
 public record DepartmentSearchRequest(
     String nameOrDescription,
     Long idAfter,

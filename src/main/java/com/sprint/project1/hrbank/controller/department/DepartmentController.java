@@ -18,7 +18,7 @@ public class DepartmentController {
     private final DepartmentService departmentService;
 
     @PostMapping
-    public ResponseEntity<DepartmentResponse> createDepartment(@RequestBody DepartmentCreateRequest request) {
+    public ResponseEntity<DepartmentResponse> createDepartment(@Validated @RequestBody DepartmentCreateRequest request) {
         DepartmentResponse response = departmentService.createDepartment(request);
         return ResponseEntity.ok().body(response);
     }
@@ -31,13 +31,13 @@ public class DepartmentController {
 
     @GetMapping
     public ResponseEntity<DepartmentPageResponse> getDepartmentPage(
-        @Validated @ModelAttribute DepartmentSearchRequest request) {
+        @ModelAttribute DepartmentSearchRequest request) {
         DepartmentPageResponse response = departmentService.getDepartmentPage(request);
         return ResponseEntity.ok().body(response);
     }
 
     @PatchMapping("/{departmentId}")
-    public ResponseEntity<DepartmentResponse> updateDepartment(@PathVariable Long departmentId, @RequestBody DepartmentUpdateRequest request) {
+    public ResponseEntity<DepartmentResponse> updateDepartment(@PathVariable Long departmentId, @Validated @RequestBody DepartmentUpdateRequest request) {
         DepartmentResponse response = departmentService.updateDepartment(departmentId, request);
         return ResponseEntity.ok().body(response);
     }

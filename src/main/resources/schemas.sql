@@ -10,7 +10,7 @@ CREATE TABLE files(
 CREATE TABLE departments (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE,
-    description TEXT,
+    description TEXT NOT NULL,
     established_date DATE NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP

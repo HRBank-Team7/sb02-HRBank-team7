@@ -6,6 +6,9 @@ import com.sprint.project1.hrbank.dto.department.DepartmentResponse;
 import com.sprint.project1.hrbank.dto.department.DepartmentSearchRequest;
 import com.sprint.project1.hrbank.dto.department.DepartmentUpdateRequest;
 import com.sprint.project1.hrbank.entity.department.Department;
+import com.sprint.project1.hrbank.exception.department.DepartmentDeletionNotAllowedException;
+import com.sprint.project1.hrbank.exception.department.DepartmentNotFoundException;
+import com.sprint.project1.hrbank.exception.util.InvalidCursorFormatException;
 import com.sprint.project1.hrbank.mapper.department.DepartmentMapper;
 import com.sprint.project1.hrbank.repository.department.DepartmentRepository;
 import com.sprint.project1.hrbank.repository.employee.EmployeeRepository;
@@ -22,8 +25,6 @@ import org.springframework.data.domain.Pageable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -49,7 +50,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public DepartmentResponse getDepartment(Long departmentId) {
         Department department = departmentRepository.findById(departmentId)
-            .orElseThrow(() -> new NoSuchElementException("department not found" + departmentId));
+            .orElseThrow(() -> new DepartmentNotFoundException("부서를 찾을 수 없습니다."));
 
         long employeeCount = getEmployeeCountBy(department);
         return departmentMapper.toResponse(department, employeeCount);
@@ -107,7 +108,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public DepartmentResponse updateDepartment(Long departmentId, DepartmentUpdateRequest updateRequest) {
         Department department = departmentRepository.findById(departmentId)
-                .orElseThrow(() -> new NoSuchElementException("department not found" + departmentId));
+                .orElseThrow(() -> new DepartmentNotFoundException("부서를 찾을 수 없습니다."));
         Department other = departmentRepository.findByName(updateRequest.name());
         department.validateNotDuplicateWith(other);
 
@@ -120,11 +121,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public void deleteDepartment(Long departmentId) {
         Department department = departmentRepository.findById(departmentId)
-                .orElseThrow(() -> new NoSuchElementException("department not found" + departmentId));
+                .orElseThrow(() -> new DepartmentNotFoundException("부서를 찾을 수 없습니다."));
 
         long employeeCount = getEmployeeCountBy(department);
         if (employeeCount > 0) {
-            throw new IllegalStateException("소속 직원이 있는 부서는 삭제할 수 없습니다.");
+            throw new DepartmentDeletionNotAllowedException("부서를 삭제할 수 없습니다.");
         }
         departmentRepository.delete(department);
     }
@@ -180,9 +181,10 @@ public class DepartmentServiceImpl implements DepartmentService {
         try {
             return LocalDate.parse(cursor, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("잘못된 커서 형식입니다. yyyy-MM-dd 형식이어야 합니다.");
+            throw new InvalidCursorFormatException("잘못된 커서 형식입니다.");
         }
     }
+
 
     private static String getNextCursor(Department cursorDepartment, String sortField) {
         if (sortField.equals("name")) {
@@ -204,8 +206,9 @@ public class DepartmentServiceImpl implements DepartmentService {
     private static String decodeCursor(String cursor) {
         try {
             return new String(Base64.getDecoder().decode(cursor.toString()), StandardCharsets.UTF_8);
-        } catch (Exception ignored) {}
-        return null;
+        } catch (Exception ex) {
+            throw new InvalidCursorFormatException("잘못된 커서 형식입니다.");
+        }
     }
 
     private static String getNextCursor(boolean hasNext, Department nextCursorDepartment,
