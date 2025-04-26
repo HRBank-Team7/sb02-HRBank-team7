@@ -1,7 +1,7 @@
 package com.sprint.project1.hrbank.mapper.backup;
 
+import com.sprint.project1.hrbank.dto.backup.BackupResponse;
 import com.sprint.project1.hrbank.entity.backup.Backup;
-import com.sprint.project1.hrbank.dto.backup.BackupDto;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -11,5 +11,5 @@ public interface BackupMapper {
   @Mapping(target = "fileId", source = "file.id")
   @Mapping(target = "fileName", source = "file.name")
   @Mapping(target = "status", source = "status")
-  BackupDto toDto(Backup entity);
+  BackupResponse toDto(Backup entity);
 }
