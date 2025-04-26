@@ -1,26 +1,27 @@
 package com.sprint.project1.hrbank.service.backup;
 
-import com.sprint.project1.hrbank.dto.backup.BackupDto;
-import com.sprint.project1.hrbank.dto.file.FileCreateRequest;
+import static com.sprint.project1.hrbank.util.CursorManager.encode;
+
+import com.sprint.project1.hrbank.dto.backup.BackupPagingRequest;
+import com.sprint.project1.hrbank.dto.backup.BackupResponse;
+import com.sprint.project1.hrbank.dto.backup.BackupSliceResponse;
 import com.sprint.project1.hrbank.entity.backup.Backup;
 import com.sprint.project1.hrbank.entity.backup.BackupStatus;
-import com.sprint.project1.hrbank.entity.employee.Employee;
 import com.sprint.project1.hrbank.entity.file.File;
 import com.sprint.project1.hrbank.exception.backup.BackupFailureException;
 import com.sprint.project1.hrbank.exception.backup.BackupInProgressException;
-import com.sprint.project1.hrbank.infrastructure.EmployeeCsvGenerator;
-import com.sprint.project1.hrbank.infrastructure.ErrorLogWriter;
+import com.sprint.project1.hrbank.exception.backup.BackupLogStorageException;
+import com.sprint.project1.hrbank.service.backup.helper.BackupHelper;
 import com.sprint.project1.hrbank.mapper.backup.BackupMapper;
 import com.sprint.project1.hrbank.repository.backup.BackupRepository;
 import com.sprint.project1.hrbank.repository.employee.EmployeeRepository;
-import com.sprint.project1.hrbank.service.file.FileService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -29,10 +30,8 @@ public class BackupServiceImpl implements BackupService {
 
   private final BackupRepository backupRepository;
   private final EmployeeRepository employeeRepository;
-  private final FileService fileService;
   private final BackupMapper backupMapper;
-  private final EmployeeCsvGenerator employeeCsvGenerator;
-  private final ErrorLogWriter errorLogWriter;
+  private final BackupHelper backupHelper;
 
   /**
    * [직원 백업 프로세스 전체 흐름]
@@ -48,7 +47,7 @@ public class BackupServiceImpl implements BackupService {
    */
   @Override
   @Transactional
-  public BackupDto triggerManualBackup(String workerIp) {
+  public BackupResponse triggerManualBackup(String workerIp) {
     backupRepository.findTopByStatus(BackupStatus.IN_PROGRESS).ifPresent(b -> {
       throw new BackupInProgressException();
     });
@@ -67,47 +66,37 @@ public class BackupServiceImpl implements BackupService {
     }
 
     try {
-      performBackup(backup);
+      File saveFile = backupHelper.backupEmployees();
+      backup.complete(saveFile);
+      return backupMapper.toDto(backup);
     } catch (Exception ex) {
       handleBackupFailure(backup, ex);
       throw new BackupFailureException("백업 중 예외 발생,", ex);
     }
-
-    return backupMapper.toDto(backup);
   }
 
-  private void performBackup(Backup backup) throws IOException {
-    List<Employee> employees = employeeRepository.findAll();
-    String csvFilename = "backups/employee_backup_" + System.currentTimeMillis() + ".csv";
-    byte[] csvBytes = employeeCsvGenerator.generateCsvBytes(employees);
+  @Override
+  @Transactional(readOnly = true)
+  public BackupSliceResponse searchBackups(BackupPagingRequest request) {
+    List<Backup> backups = backupRepository.search(request);
 
-    FileCreateRequest request = new FileCreateRequest(
-        csvFilename,
-        "text/csv",
-        (long) csvBytes.length,
-        csvBytes
-    );
-    File savedFile = fileService.create(request, csvFilename);
-    backup.complete(savedFile);
-    log.info("Backup completed successfully: {}", savedFile.getName());
+    List<BackupResponse> contents = backups.stream()
+        .map(backupMapper::toDto)
+        .toList();
+
+    String nextCursor = backups.isEmpty()
+        ? null
+        : encode(backups.get(backups.size() - 1).getId());
+
+    return new BackupSliceResponse(contents, nextCursor);
   }
 
   private void handleBackupFailure(Backup backup, Exception ex) {
-    log.error("Backup failed", ex);
     try {
-      byte[] errorBytes = errorLogWriter.generateLogBytes(ex);
-      String logFilename = "logs/backup_error_" + System.currentTimeMillis() + ".log";
-
-      FileCreateRequest errorRequest = new FileCreateRequest(
-          logFilename,
-          "text/plain",
-          (long) errorBytes.length,
-          errorBytes
-      );
-      File errorLog = fileService.create(errorRequest, logFilename);
-      backup.fail(errorLog);
+      File errorFile = backupHelper.writeBackupErrorLog(ex);
+      backup.fail(errorFile);
     } catch (IOException ioEx) {
-      throw new RuntimeException("로그 파일 저장 중 오류 발생", ioEx);
+      throw new BackupLogStorageException("로그 파일 저장 실패", ioEx);
     }
   }
 }

@@ -5,7 +5,7 @@ import com.sprint.project1.hrbank.entity.backup.BackupStatus;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface BackupRepository extends JpaRepository<Backup, Long> {
+public interface BackupRepository extends JpaRepository<Backup, Long>, BackupRepositoryCustom{
 
   Optional<Backup> findTopByStatusOrderByEndedAtDesc(BackupStatus status);
 
