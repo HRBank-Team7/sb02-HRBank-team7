@@ -11,5 +11,5 @@ public interface BackupMapper {
   @Mapping(target = "fileId", source = "file.id")
   @Mapping(target = "fileName", source = "file.name")
   @Mapping(target = "status", source = "status")
-  BackupResponse toDto(Backup entity);
+  BackupResponse toResponse(Backup entity);
 }

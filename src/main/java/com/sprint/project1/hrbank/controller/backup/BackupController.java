@@ -25,7 +25,7 @@ public class BackupController {
   }
 
   @GetMapping
-  ResponseEntity<BackupSliceResponse> searchBackups(@Valid BackupPagingRequest request) {
+  ResponseEntity<BackupSliceResponse> searchBackups(@Valid @ModelAttribute BackupPagingRequest request) {
     BackupSliceResponse result = backupService.searchBackups(request);
     return ResponseEntity.ok(result);
   }

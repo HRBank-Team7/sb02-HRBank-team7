@@ -56,13 +56,13 @@ public class BackupServiceImpl implements BackupService {
       if (!checkBackupNeed()) {
         log.info("직원 이력이 변경 되지 않았습니다. skip 합니다");
         backup.skip();
-        return backupMapper.toDto(backup);
+        return backupMapper.toResponse(backup);
       }
 
       try {
         File saveFile = backupHelper.backupEmployees();
         backup.complete(saveFile);
-        return backupMapper.toDto(backup);
+        return backupMapper.toResponse(backup);
       } catch (Exception ex) {
         handleBackupFailure(backup, ex);
         throw new BackupFailureException("백업 중 예외 발생", ex);
@@ -76,7 +76,7 @@ public class BackupServiceImpl implements BackupService {
       List<Backup> backups = backupRepository.search(request);
 
       List<BackupResponse> contents = backups.stream()
-          .map(backupMapper::toDto)
+          .map(backupMapper::toResponse)
           .toList();
 
       String nextCursor = backups.isEmpty()
