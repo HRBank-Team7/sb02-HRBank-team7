@@ -6,11 +6,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import java.time.Instant;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,7 +25,6 @@ public class Backup extends BaseEntity {
   private String worker;
 
   @Column(nullable = false)
-  @Temporal(TemporalType.TIMESTAMP)
   private Instant startedAt;
 
   @Column(nullable = true)
@@ -37,7 +35,7 @@ public class Backup extends BaseEntity {
   @JdbcTypeCode(SqlTypes.NAMED_ENUM)
   private BackupStatus status;
 
-  @OneToOne
+  @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "file_id")
   private File file;
 
