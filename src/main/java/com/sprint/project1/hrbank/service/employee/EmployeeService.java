@@ -14,11 +14,11 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface EmployeeService {
-  EmployeeResponse createEmployee(EmployeeCreateRequest request, MultipartFile profile);
+  EmployeeResponse createEmployee(EmployeeCreateRequest request, MultipartFile profile, String ip);
 
-  void deleteEmployee(Long id);
+  void deleteEmployee(Long id, String ip);
 
-  EmployeeResponse updateEmployee(Long id, EmployeeUpdateRequest request, MultipartFile profile);
+  EmployeeResponse updateEmployee(Long id, EmployeeUpdateRequest request, MultipartFile profile, String ip);
 
   List<EmployeeTrendResponse> getEmployeeTrend(LocalDate from, LocalDate to, String unit);
 

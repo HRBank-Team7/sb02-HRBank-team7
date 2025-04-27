@@ -9,6 +9,7 @@ import com.sprint.project1.hrbank.dto.employee.EmployeeTrendResponse;
 import com.sprint.project1.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.sprint.project1.hrbank.entity.employee.EmployeeStatus;
 import com.sprint.project1.hrbank.service.employee.EmployeeService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
@@ -37,17 +38,21 @@ public  class EmployeeController {
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<EmployeeResponse> createEmployee(
       @Valid @RequestPart(value = "employee") EmployeeCreateRequest request,
-      @RequestPart(value = "profile", required = false) MultipartFile profile
+      @RequestPart(value = "profile", required = false) MultipartFile profile,
+      HttpServletRequest httpServletRequest
   ) {
-    EmployeeResponse employeeResponseResponse = employeeService.createEmployee(request, profile);
+    String ip = httpServletRequest.getRemoteAddr();
+    EmployeeResponse employeeResponseResponse = employeeService.createEmployee(request, profile, ip);
     return ResponseEntity.ok(employeeResponseResponse);
   }
 
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deleteEmployee(
-      @PathVariable Long id
+      @PathVariable Long id,
+      HttpServletRequest httpServletRequest
   ) {
-    employeeService.deleteEmployee(id);
+    String ip = httpServletRequest.getRemoteAddr();
+    employeeService.deleteEmployee(id, ip);
     return ResponseEntity.noContent().build();
   }
 
@@ -55,9 +60,11 @@ public  class EmployeeController {
   public ResponseEntity<EmployeeResponse> updateEmployee(
       @PathVariable Long id,
       @Valid @RequestPart(value = "employee") EmployeeUpdateRequest request,
-      @RequestPart(value = "profile", required = false) MultipartFile profile //파일 나중에 처리 해야함
+      @RequestPart(value = "profile", required = false) MultipartFile profile,
+      HttpServletRequest httpServletRequest
   ) {
-    EmployeeResponse employeeResponse = employeeService.updateEmployee(id, request, profile);
+    String ip = httpServletRequest.getRemoteAddr();
+    EmployeeResponse employeeResponse = employeeService.updateEmployee(id, request, profile, ip);
     return ResponseEntity.ok(employeeResponse);
   }
   

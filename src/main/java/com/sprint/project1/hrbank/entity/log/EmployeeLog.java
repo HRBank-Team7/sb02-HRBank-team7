@@ -2,7 +2,6 @@ package com.sprint.project1.hrbank.entity.log;
 
 import com.sprint.project1.hrbank.entity.base.BaseEntity;
 import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
 import java.time.Instant;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
@@ -19,7 +18,7 @@ import org.hibernate.type.SqlTypes;
 @AllArgsConstructor
 @Entity
 @Table(name = "employee_change_logs")
-public class EmployeeChangeLog extends BaseEntity{
+public class EmployeeLog extends BaseEntity{
 
   @Column(length = 100, nullable = false)
   private String type;

@@ -28,4 +28,12 @@ public class CursorManager {
       throw new InvalidCursorFormatException("잘못된 커서 포맷 입니다");
     }
   }
+
+  public static String decodeCursorToString(String cursor) {
+    try {
+      return new String(Base64.getDecoder().decode(cursor), StandardCharsets.UTF_8);
+    }catch(IllegalArgumentException ex){
+      throw new InvalidCursorFormatException("잘못된 커서 형식입니다.");
+    }
+  }
 }

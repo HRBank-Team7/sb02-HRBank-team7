@@ -89,7 +89,10 @@ public interface EmployeeMapper {
   default EmployeeSearchCondition toCondition(
       EmployeeSearchRequest request,
       Pageable pageable,
-      String cursor){
+      String cursor,
+      String sortField,
+      String sortDirection
+  ){
     return new EmployeeSearchCondition(
         request.nameOrEmail(),
         request.departmentName(),
@@ -100,8 +103,8 @@ public interface EmployeeMapper {
         request.status(),
         request.idAfter(),
         cursor,
-        request.sortField(),
-        request.sortDirection(),
+        sortField,
+        sortDirection,
         pageable
     );
   }
