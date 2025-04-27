@@ -1,12 +1,15 @@
 package com.sprint.project1.hrbank.controller.employee;
 
+import com.sprint.project1.hrbank.dto.employee.CursorPageEmployeeResponse;
 import com.sprint.project1.hrbank.dto.employee.EmployeeCreateRequest;
 import com.sprint.project1.hrbank.dto.employee.EmployeeDistributionResponse;
 import com.sprint.project1.hrbank.dto.employee.EmployeeResponse;
+import com.sprint.project1.hrbank.dto.employee.EmployeeSearchRequest;
 import com.sprint.project1.hrbank.dto.employee.EmployeeTrendResponse;
 import com.sprint.project1.hrbank.dto.employee.EmployeeUpdateRequest;
 import com.sprint.project1.hrbank.entity.employee.EmployeeStatus;
 import com.sprint.project1.hrbank.service.employee.EmployeeService;
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,7 +36,7 @@ public  class EmployeeController {
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ResponseEntity<EmployeeResponse> createEmployee(
-      @RequestPart(value = "employee") EmployeeCreateRequest request,
+      @Valid @RequestPart(value = "employee") EmployeeCreateRequest request,
       @RequestPart(value = "profile", required = false) MultipartFile profile
   ) {
     EmployeeResponse employeeResponseResponse = employeeService.createEmployee(request, profile);
@@ -50,7 +54,7 @@ public  class EmployeeController {
   @PatchMapping("/{id}")
   public ResponseEntity<EmployeeResponse> updateEmployee(
       @PathVariable Long id,
-      @RequestPart(value = "employee") EmployeeUpdateRequest request,
+      @Valid @RequestPart(value = "employee") EmployeeUpdateRequest request,
       @RequestPart(value = "profile", required = false) MultipartFile profile //파일 나중에 처리 해야함
   ) {
     EmployeeResponse employeeResponse = employeeService.updateEmployee(id, request, profile);
@@ -86,5 +90,21 @@ public  class EmployeeController {
   ){
     Long employeeCount = employeeService.getEmployeeByCount(status, fromDate, toDate);
     return ResponseEntity.ok(employeeCount);
+  }
+
+  @GetMapping
+  public ResponseEntity<CursorPageEmployeeResponse> getEmployees(
+      @ModelAttribute EmployeeSearchRequest request
+  ){
+    CursorPageEmployeeResponse response = employeeService.getAllEmployee(request);
+    return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<EmployeeResponse> getEmployeeById(
+      @PathVariable Long id
+  ){
+      EmployeeResponse response = employeeService.getEmployeeById(id);
+      return ResponseEntity.ok(response);
   }
 }
