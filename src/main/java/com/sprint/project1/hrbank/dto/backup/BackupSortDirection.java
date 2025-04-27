@@ -5,7 +5,6 @@ public enum BackupSortDirection {
   DESC;
 
   public static BackupSortDirection from(String value) {
-    System.out.println("🔄 컨버팅 시도: " + value);
     if (value == null) {
       return null;
     }

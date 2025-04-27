@@ -38,9 +38,14 @@ public class BackupRepositoryCustomImpl implements BackupRepositoryCustom {
       predicates.add(cb.like(backup.get("worker"), "%" + request.worker() + "%"));
     }
     // 시작일 범위 필터링
-    if (request.startedAtFrom() != null && request.startedAtTo() != null) {
-      predicates.add(cb.between(backup.get("startedAt"), request.startedAtFrom(), request.startedAtTo()));
+    if(request.startedAtFrom() != null){
+      predicates.add(cb.greaterThanOrEqualTo(backup.get("startedAt"), request.startedAtFrom()));
     }
+
+    if(request.startedAtTo() != null){
+      predicates.add(cb.lessThanOrEqualTo(backup.get("startedAt"), request.startedAtTo()));
+    }
+
     // status 필터링
     if (request.status() != null) {
       predicates.add(cb.equal(backup.get("status"), request.status()));
