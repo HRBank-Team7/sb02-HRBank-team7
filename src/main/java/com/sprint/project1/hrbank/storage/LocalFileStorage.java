@@ -72,6 +72,19 @@ public class LocalFileStorage implements FileStorage {
         return resource;
     }
 
+
+
+    @Override
+    public Resource download(String filename) {
+        Path path = resolvePath(filename);
+        try {
+            InputStream inputStream = Files.newInputStream(path);
+            return new InputStreamResource(inputStream);
+        } catch (IOException e) {
+            throw new RuntimeException("파일 다운로드 실패: " + path, e);
+        }
+    }
+
     @Override
     public void delete(Long fileId) {
         try {
