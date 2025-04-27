@@ -1,7 +1,5 @@
 package com.sprint.project1.hrbank.service.backup;
 
-import static com.sprint.project1.hrbank.util.CursorManager.encode;
-
 import com.sprint.project1.hrbank.dto.backup.BackupPagingRequest;
 import com.sprint.project1.hrbank.dto.backup.BackupResponse;
 import com.sprint.project1.hrbank.dto.backup.BackupSliceResponse;
@@ -15,6 +13,7 @@ import com.sprint.project1.hrbank.service.backup.helper.BackupHelper;
 import com.sprint.project1.hrbank.mapper.backup.BackupMapper;
 import com.sprint.project1.hrbank.repository.backup.BackupRepository;
 import com.sprint.project1.hrbank.repository.employee.EmployeeRepository;
+import com.sprint.project1.hrbank.util.CursorManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -69,22 +68,29 @@ public class BackupServiceImpl implements BackupService {
       }
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public BackupSliceResponse searchBackups(BackupPagingRequest request) {
+  @Override
+  @Transactional(readOnly = true)
+  public BackupSliceResponse searchBackups(BackupPagingRequest request) {
+    List<Backup> backups = backupRepository.search(request);
 
-      List<Backup> backups = backupRepository.search(request);
+    List<BackupResponse> contents = backups.stream()
+        .map(backupMapper::toResponse)
+        .toList();
 
-      List<BackupResponse> contents = backups.stream()
-          .map(backupMapper::toResponse)
-          .toList();
+    String nextCursor = backups.isEmpty()
+        ? null
+        : CursorManager.encode(backups.get(backups.size() - 1).getStartedAt());
 
-      String nextCursor = backups.isEmpty()
-          ? null
-          : encode(backups.get(backups.size() - 1).getId());
+    Long nextIdAfter = backups.isEmpty()
+        ? null
+        : backups.get(backups.size() - 1).getId();
 
-      return new BackupSliceResponse(contents, nextCursor);
-    }
+    Integer size = backups.size();
+    boolean hasNext = size.equals(request.size());
+    Long totalCount = backupRepository.countByConditions(request);
+
+    return new BackupSliceResponse(contents, nextCursor, nextIdAfter, size, totalCount, hasNext);
+  }
 
     private void validateInProgressBackup() {
       backupRepository.findTopByStatus(BackupStatus.IN_PROGRESS).ifPresent(b -> {

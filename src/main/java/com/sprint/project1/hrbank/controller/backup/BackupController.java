@@ -4,6 +4,7 @@ import com.sprint.project1.hrbank.dto.backup.BackupPagingRequest;
 import com.sprint.project1.hrbank.dto.backup.BackupResponse;
 import com.sprint.project1.hrbank.dto.backup.BackupSliceResponse;
 import com.sprint.project1.hrbank.service.backup.BackupService;
+import com.sprint.project1.hrbank.util.ClientIpUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,10 +17,11 @@ import org.springframework.web.bind.annotation.*;
 public class BackupController {
 
   private final BackupService backupService;
+  private final ClientIpUtil clientIpUtil;
 
   @PostMapping
   public ResponseEntity<BackupResponse> createBackups(HttpServletRequest request) {
-    String workerIp = request.getRemoteAddr();
+    String workerIp = clientIpUtil.getClientIp(request);
     BackupResponse result = backupService.triggerManualBackup(workerIp);
     return ResponseEntity.ok(result);
   }
