@@ -8,11 +8,13 @@ import com.sprint.project1.hrbank.infrastructure.EmployeeCsvGenerator;
 import com.sprint.project1.hrbank.infrastructure.ErrorLogWriter;
 import com.sprint.project1.hrbank.repository.employee.EmployeeRepository;
 import com.sprint.project1.hrbank.service.file.FileService;
-import java.io.IOException;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
+import java.util.stream.Stream;
 
 @Component
 @Slf4j
@@ -24,17 +26,19 @@ public class BackupHelper {
   private final ErrorLogWriter errorLogWriter;
   private final FileService fileService;
 
+  @Transactional(readOnly = true)
   public File backupEmployees() throws IOException {
-    List<Employee> employees = employeeRepository.findAll();
-    byte[] csvBytes = employeeCsvGenerator.generateCsvBytes(employees);
+    try (Stream<Employee> employeeStream = employeeRepository.streamAll()) {
+      byte[] csvBytes = employeeCsvGenerator.generateCsvBytes(employeeStream);
 
-    FileCreateRequest request = new FileCreateRequest(
-        generateCsvFilename(),
-        MimeTypes.CSV,
-        (long) csvBytes.length,
-        csvBytes
-    );
-    return fileService.create(request, request.name());
+      FileCreateRequest request = new FileCreateRequest(
+          generateCsvFilename(),
+          MimeTypes.CSV,
+          (long) csvBytes.length,
+          csvBytes
+      );
+      return fileService.create(request, request.name());
+    }
   }
 
   public File writeBackupErrorLog(Exception ex) throws IOException {

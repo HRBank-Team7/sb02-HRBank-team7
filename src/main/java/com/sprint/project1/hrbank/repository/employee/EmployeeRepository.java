@@ -2,11 +2,14 @@ package com.sprint.project1.hrbank.repository.employee;
 
 import com.sprint.project1.hrbank.entity.employee.Employee;
 import com.sprint.project1.hrbank.entity.employee.EmployeeStatus;
+import jakarta.persistence.QueryHint;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long>, EmployeeRepositoryCustom{
@@ -44,5 +47,11 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, Emplo
   // 기간별(상태 포함) 직원수 조회
   @Query("select count(e) from Employee e where e.status = :status and (:fromDate <= e.hireDate and e.hireDate <= :toDate)")
   Long countEmployeesByHireDateWithStatus(@Param("status") EmployeeStatus status, @Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
+
+  @Query("SELECT e FROM Employee e")
+  @QueryHints(value = {
+      @QueryHint(name = "org.hibernate.fetchSize", value = "100")
+  })
+  Stream<Employee> streamAll();
 
 }
