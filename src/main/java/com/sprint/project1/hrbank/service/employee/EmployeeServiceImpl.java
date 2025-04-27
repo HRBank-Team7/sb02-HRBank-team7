@@ -19,6 +19,7 @@ import com.sprint.project1.hrbank.repository.department.DepartmentRepository;
 import com.sprint.project1.hrbank.repository.employee.EmployeeRepository;
 import com.sprint.project1.hrbank.service.file.FileService;
 import com.sprint.project1.hrbank.service.log.EmployeeLogService;
+import com.sprint.project1.hrbank.util.CursorManager;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -201,7 +202,9 @@ public class EmployeeServiceImpl implements EmployeeService{
     //sortField의 기본값은 무조건 name
     String sortField = (List.of("hireDate", "employeeNumber").contains(request.sortField())) ? request.sortField() : "name";
     String sortDirection = "desc".equals(request.sortDirection()) ? request.sortDirection() : "asc";
-    String cursor = (request.cursor() != null) ? decodeCursor(request.cursor()) : null;
+    String cursor = (request.cursor() != null)
+        ? CursorManager.decodeCursorToString(request.cursor())
+        : null;
 
     if(cursor != null){
       checkCursorDateFormat(sortField, cursor);
@@ -210,7 +213,7 @@ public class EmployeeServiceImpl implements EmployeeService{
     int size = (request.size() == null || request.size() == 0) ? 10 : request.size();
     Pageable pageable = PageRequest.of(0, size + 1);
 
-    EmployeeSearchCondition condition = employeeMapper.toCondition(request, pageable, cursor);
+    EmployeeSearchCondition condition = employeeMapper.toCondition(request, pageable, cursor, sortField, sortDirection);
     List<Employee> employees = employeeRepository.searchEmployees(condition);
 
     boolean hasNext = employees.size() > size;
@@ -250,13 +253,13 @@ public class EmployeeServiceImpl implements EmployeeService{
     }
   }
 
-  private String decodeCursor(String cursor) {
-    try {
-      return new String(Base64.getDecoder().decode(cursor), StandardCharsets.UTF_8);
-    }catch(IllegalArgumentException ex){
-      throw new InvalidCursorFormatException("잘못된 커서 형식입니다.");
-    }
-  }
+//  private String decodeCursor(String cursor) {
+//    try {
+//      return new String(Base64.getDecoder().decode(cursor), StandardCharsets.UTF_8);
+//    }catch(IllegalArgumentException ex){
+//      throw new InvalidCursorFormatException("잘못된 커서 형식입니다.");
+//    }
+//  }
 
   private String extractCursor(Employee lastEmployee, EmployeeSearchRequest request) {
     String extractedCursor = switch(request.sortField()) {

@@ -1,24 +1,50 @@
 package com.sprint.project1.hrbank.mapper.log;
 
-import com.sprint.project1.hrbank.dto.log.DiffCondition;
-import com.sprint.project1.hrbank.entity.employee.Employee;
-import com.sprint.project1.hrbank.entity.log.EmployeeChangeLog;
+import com.sprint.project1.hrbank.dto.log.ChangeLogResponse;
+import com.sprint.project1.hrbank.dto.log.DiffResponse;
+import com.sprint.project1.hrbank.dto.log.EmployeeLogCondition;
+import com.sprint.project1.hrbank.dto.log.EmployeeLogSearchRequest;
 import com.sprint.project1.hrbank.entity.log.EmployeeDiff;
-import java.time.Instant;
-import java.util.List;
+import com.sprint.project1.hrbank.entity.log.EmployeeLog;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.springframework.data.domain.Pageable;
 
 @Mapper(componentModel = "spring")
 public interface LogMapper {
 
-  @Mapping(target = "employeeDiffs", source = "diffs")
-  EmployeeChangeLog toEntity(
-      List<EmployeeDiff> diffs,
-      String employeeNumber,
-      String type,
-      String memo,
-      String ipAddress,
-      Instant at
-  );
+//  @Mapping(target = "employeeDiffs", source = "diffs")
+//  EmployeeLog toEntity(
+//      List<EmployeeDiff> diffs,
+//      String employeeNumber,
+//      String type,
+//      String memo,
+//      String ipAddress,
+//      Instant at
+//  );
+
+  DiffResponse toResponse(EmployeeDiff diff);
+
+  ChangeLogResponse toResponse(EmployeeLog log);
+
+  default EmployeeLogCondition toCondition(
+      EmployeeLogSearchRequest request,
+      Pageable pageable,
+      String cursor,
+      String sortField,
+      String sortDirection
+  ){
+    return new EmployeeLogCondition(
+      request.type(),
+      request.employeeNumber(),
+      request.memo(),
+      request.ipAddress(),
+      request.atFrom(),
+      request.atTo(),
+      request.idAfter(),
+      cursor,
+      sortField,
+      sortDirection,
+      pageable
+    );
+  }
 }

@@ -1,5 +1,6 @@
 package com.sprint.project1.hrbank.util;
 
+import com.sprint.project1.hrbank.exception.util.InvalidCursorFormatException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -22,6 +23,14 @@ public class CursorManager {
       return Long.parseLong(decoded);
     } catch (Exception e) {
       throw new IllegalArgumentException("포맷이 올바르지 않습니다");
+    }
+  }
+
+  public static String decodeCursorToString(String cursor) {
+    try {
+      return new String(Base64.getDecoder().decode(cursor), StandardCharsets.UTF_8);
+    }catch(IllegalArgumentException ex){
+      throw new InvalidCursorFormatException("잘못된 커서 형식입니다.");
     }
   }
 }
