@@ -3,6 +3,7 @@ package com.sprint.project1.hrbank.controller.backup;
 import com.sprint.project1.hrbank.dto.backup.BackupPagingRequest;
 import com.sprint.project1.hrbank.dto.backup.BackupResponse;
 import com.sprint.project1.hrbank.dto.backup.BackupSliceResponse;
+import com.sprint.project1.hrbank.entity.backup.BackupStatus;
 import com.sprint.project1.hrbank.service.backup.BackupService;
 import com.sprint.project1.hrbank.util.ClientIpUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,5 +31,10 @@ public class BackupController {
   ResponseEntity<BackupSliceResponse> searchBackups(@Valid @ModelAttribute BackupPagingRequest request) {
     BackupSliceResponse result = backupService.searchBackups(request);
     return ResponseEntity.ok(result);
+  }
+
+  @GetMapping("/latest")
+  public BackupResponse getLatestBackup(@RequestParam(value = "status", required = false) BackupStatus status) {
+    return backupService.findLatestBackup(status);
   }
 }

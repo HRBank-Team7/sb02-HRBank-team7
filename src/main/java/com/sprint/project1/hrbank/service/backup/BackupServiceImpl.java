@@ -9,11 +9,13 @@ import com.sprint.project1.hrbank.entity.file.File;
 import com.sprint.project1.hrbank.exception.backup.BackupFailureException;
 import com.sprint.project1.hrbank.exception.backup.BackupInProgressException;
 import com.sprint.project1.hrbank.exception.backup.BackupLogStorageException;
+import com.sprint.project1.hrbank.exception.backup.BackupNotFoundException;
 import com.sprint.project1.hrbank.service.backup.helper.BackupHelper;
 import com.sprint.project1.hrbank.mapper.backup.BackupMapper;
 import com.sprint.project1.hrbank.repository.backup.BackupRepository;
 import com.sprint.project1.hrbank.repository.employee.EmployeeRepository;
 import com.sprint.project1.hrbank.util.CursorManager;
+import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -92,7 +94,21 @@ public class BackupServiceImpl implements BackupService {
     return new BackupSliceResponse(contents, nextCursor, nextIdAfter, size, totalCount, hasNext);
   }
 
-    private void validateInProgressBackup() {
+  @Override
+  @Transactional(readOnly = true)
+  public BackupResponse findLatestBackup(BackupStatus status) {
+    BackupStatus backupStatus = (status != null) ? status : BackupStatus.COMPLETED;
+
+    Backup backup = backupRepository.findTopByStatusOrderByEndedAtDesc(backupStatus)
+        .orElseThrow(() -> new BackupNotFoundException(backupStatus));
+
+    return backupMapper.toResponse(backup);
+  }
+
+
+
+
+  private void validateInProgressBackup() {
       backupRepository.findTopByStatus(BackupStatus.IN_PROGRESS).ifPresent(b -> {
         throw new BackupInProgressException();
       });
