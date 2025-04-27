@@ -45,6 +45,14 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    public Resource downloadByName(Long fileId) {
+        File file = fileRepository.findById(fileId)
+            .orElseThrow(() -> new FileNotFoundException("파일을 찾을 수 없습니다."));
+
+        return fileStorage.download(file.getName());
+    }
+
+    @Override
     public FileMetadata getMetadata(Long fileId) {
         File file = fileRepository.findById(fileId)
                 .orElseThrow(() -> new FileNotFoundException("파일을 찾을 수 없습니다."));

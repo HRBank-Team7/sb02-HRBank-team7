@@ -58,4 +58,11 @@ public class BackupExceptionHandler {
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .body(ErrorResponse.of("BACKUP_FILE_STORAGE_ERROR", ex.getMessage()));
   }
+
+  @ExceptionHandler(InvalidBackupStatusException.class)
+  public ResponseEntity<ErrorResponse> handleInvalidBackupStatus(InvalidBackupStatusException ex) {
+    return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST) // 400 Bad Request
+        .body(ErrorResponse.of("INVALID_BACKUP_STATUS", ex.getMessage()));
+  }
 }

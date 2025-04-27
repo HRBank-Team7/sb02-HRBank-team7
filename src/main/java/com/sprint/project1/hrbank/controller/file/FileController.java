@@ -23,15 +23,30 @@ public class FileController {
 
     @GetMapping("/{id}/download")
     public ResponseEntity<Resource> download(@PathVariable Long id) {
-        Resource resource = fileService.download(id);
         FileMetadata fileMetadata = fileService.getMetadata(id);
+        Resource resource;
 
-        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + fileMetadata.name() + "\"")
+        if (fileMetadata.name().startsWith("backups/")) {
+            resource = fileService.downloadByName(id);
+
+            return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + fileMetadata.name() + "\"")
                 .contentType(MediaType.parseMediaType(fileMetadata.type()))
                 .contentLength(fileMetadata.size())
                 .body(resource);
+        } else {
+            resource = fileService.download(id);
+
+            return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + fileMetadata.name() + "\"")
+                .contentType(MediaType.parseMediaType(fileMetadata.type()))
+                .contentLength(fileMetadata.size())
+                .body(resource);
+        }
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTest(@PathVariable Long id) {
