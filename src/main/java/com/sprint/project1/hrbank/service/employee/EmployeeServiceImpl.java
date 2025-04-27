@@ -1,18 +1,15 @@
 package com.sprint.project1.hrbank.service.employee;
 
-import com.sprint.project1.hrbank.dto.employee.CursorPageEmployeeResponse;
-import com.sprint.project1.hrbank.dto.employee.EmployeeCreateRequest;
-import com.sprint.project1.hrbank.dto.employee.EmployeeDistributionResponse;
-import com.sprint.project1.hrbank.dto.employee.EmployeeResponse;
-import com.sprint.project1.hrbank.dto.employee.EmployeeSearchCondition;
-import com.sprint.project1.hrbank.dto.employee.EmployeeSearchRequest;
-import com.sprint.project1.hrbank.dto.employee.EmployeeTrendResponse;
-import com.sprint.project1.hrbank.dto.employee.EmployeeUpdateRequest;
+import com.sprint.project1.hrbank.dto.employee.*;
 import com.sprint.project1.hrbank.dto.file.FileCreateRequest;
 import com.sprint.project1.hrbank.entity.department.Department;
 import com.sprint.project1.hrbank.entity.employee.Employee;
 import com.sprint.project1.hrbank.entity.employee.EmployeeStatus;
 import com.sprint.project1.hrbank.entity.file.File;
+import com.sprint.project1.hrbank.exception.department.DepartmentNotFoundException;
+import com.sprint.project1.hrbank.exception.employee.DuplicateEmployeeEmailException;
+import com.sprint.project1.hrbank.exception.employee.EmployeeNotFoundException;
+import com.sprint.project1.hrbank.exception.employee.EmployeeProfileException;
 import com.sprint.project1.hrbank.exception.util.InvalidCursorFormatException;
 import com.sprint.project1.hrbank.mapper.employee.EmployeeMapper;
 import com.sprint.project1.hrbank.repository.department.DepartmentRepository;
@@ -20,6 +17,13 @@ import com.sprint.project1.hrbank.repository.employee.EmployeeRepository;
 import com.sprint.project1.hrbank.service.file.FileService;
 import com.sprint.project1.hrbank.service.log.EmployeeLogService;
 import com.sprint.project1.hrbank.util.CursorManager;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -27,18 +31,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -54,10 +47,10 @@ public class EmployeeServiceImpl implements EmployeeService{
   @Transactional
   public EmployeeResponse createEmployee(EmployeeCreateRequest request, MultipartFile profile, String ip) {
     Department department = departmentRepository.findById(request.departmentId())
-        .orElseThrow(() -> new RuntimeException("Department not found"));
+        .orElseThrow(() -> new DepartmentNotFoundException("부서를 찾을 수 없습니다."));
 
     if (employeeRepository.existsByEmail(request.email())) {
-      throw new IllegalArgumentException("Email already exists");
+      throw new DuplicateEmployeeEmailException("이미 존재하는 이메일 입니다.");
     }
 
     File file = Optional.ofNullable(profile)
@@ -71,7 +64,7 @@ public class EmployeeServiceImpl implements EmployeeService{
                 p.getBytes()
             ));
           } catch (IOException e) {
-            throw new RuntimeException("Failed to process profile file", e);
+            throw new EmployeeProfileException("프로필 사진 처리 중 에러 발생");
           }
         })
         .orElse(null);
@@ -91,7 +84,7 @@ public class EmployeeServiceImpl implements EmployeeService{
   @Transactional
   public void deleteEmployee(Long employeeId, String ip) {
     Employee employee = employeeRepository.findById(employeeId)
-        .orElseThrow(() -> new NoSuchElementException("Employee not found for id: " + employeeId));
+        .orElseThrow(() -> new EmployeeNotFoundException("직원을 찾을 수 없습니다."));
     employeeLogService.createLog(employee, null, null, ip);
     employeeRepository.delete(employee);
   }
@@ -100,10 +93,10 @@ public class EmployeeServiceImpl implements EmployeeService{
   @Transactional
   public EmployeeResponse updateEmployee(Long employeeId, EmployeeUpdateRequest request, MultipartFile profile, String ip) {
     Department department = departmentRepository.findById(request.departmentId())
-        .orElseThrow(() -> new NoSuchElementException("Department not found for id: " + request.departmentId()));
+        .orElseThrow(() -> new DepartmentNotFoundException("부서를 찾을 수 없습니다."));
 
     Employee employee = employeeRepository.findById(employeeId)
-        .orElseThrow(() -> new NoSuchElementException("Employee not found for id: " + employeeId));
+        .orElseThrow(() -> new EmployeeNotFoundException("직원을 찾을 수 없습니다."));
 
     Employee beforeEmployee = employee.toBuilder().build();
     File file = Optional.ofNullable(profile)
@@ -117,14 +110,14 @@ public class EmployeeServiceImpl implements EmployeeService{
                 p.getBytes()
             ));
           } catch (IOException e) {
-            throw new RuntimeException("Failed to process profile file", e);
+            throw new EmployeeProfileException("프로필 사진 처리 중 에러 발생");
           }
         })
         .orElse(null);
 
     if (!employee.getEmail().equals(request.email())) {
       if (employeeRepository.existsByEmail(request.email())){
-        throw new IllegalArgumentException("Email already exists");}}
+        throw new DuplicateEmployeeEmailException("이미 존재하는 이메일 입니다.");}}
 
     Employee updateEmployee = employee.update(request, department, file);
     Employee savedEmployee = employeeRepository.save(updateEmployee);
@@ -239,7 +232,7 @@ public class EmployeeServiceImpl implements EmployeeService{
 
   public EmployeeResponse getEmployeeById(Long employeeId) {
     Employee employee = employeeRepository.findById(employeeId)
-        .orElseThrow(() -> new NoSuchElementException("Employee not found for id: " + employeeId));
+        .orElseThrow(() -> new EmployeeNotFoundException("직원을 찾을 수 없습니다."));
     return employeeMapper.toResponse(employee);
   }
 
