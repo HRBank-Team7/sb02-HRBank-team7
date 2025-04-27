@@ -18,6 +18,7 @@ import com.sprint.project1.hrbank.mapper.employee.EmployeeMapper;
 import com.sprint.project1.hrbank.repository.department.DepartmentRepository;
 import com.sprint.project1.hrbank.repository.employee.EmployeeRepository;
 import com.sprint.project1.hrbank.service.file.FileService;
+import com.sprint.project1.hrbank.service.log.EmployeeLogService;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -42,6 +43,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService{
 
+  private final EmployeeLogService employeeLogService;
   private final EmployeeRepository employeeRepository;
   private final DepartmentRepository departmentRepository;
   private final FileService fileService;
@@ -49,7 +51,7 @@ public class EmployeeServiceImpl implements EmployeeService{
 
   @Override
   @Transactional
-  public EmployeeResponse createEmployee(EmployeeCreateRequest request, MultipartFile profile) {
+  public EmployeeResponse createEmployee(EmployeeCreateRequest request, MultipartFile profile, String ip) {
     Department department = departmentRepository.findById(request.departmentId())
         .orElseThrow(() -> new RuntimeException("Department not found"));
 
@@ -78,26 +80,31 @@ public class EmployeeServiceImpl implements EmployeeService{
     employee.assignFile(file);
     employee.generateEmployeeNumber();
     Employee createdEmployee = employeeRepository.save(employee);
+
+    employeeLogService.createLog(null, employee, request.memo(), ip);
+
     return employeeMapper.toResponse(createdEmployee);
   }
 
   @Override
   @Transactional
-  public void deleteEmployee(Long employeeId) {
+  public void deleteEmployee(Long employeeId, String ip) {
     Employee employee = employeeRepository.findById(employeeId)
         .orElseThrow(() -> new NoSuchElementException("Employee not found for id: " + employeeId));
+    employeeLogService.createLog(employee, null, null, ip);
     employeeRepository.delete(employee);
   }
 
   @Override
   @Transactional
-  public EmployeeResponse updateEmployee(Long employeeId, EmployeeUpdateRequest request, MultipartFile profile) {
+  public EmployeeResponse updateEmployee(Long employeeId, EmployeeUpdateRequest request, MultipartFile profile, String ip) {
     Department department = departmentRepository.findById(request.departmentId())
         .orElseThrow(() -> new NoSuchElementException("Department not found for id: " + request.departmentId()));
 
     Employee employee = employeeRepository.findById(employeeId)
         .orElseThrow(() -> new NoSuchElementException("Employee not found for id: " + employeeId));
 
+    Employee beforeEmployee = employee.toBuilder().build();
     File file = Optional.ofNullable(profile)
         .filter(p -> !p.isEmpty())
         .map(p -> {
@@ -119,8 +126,10 @@ public class EmployeeServiceImpl implements EmployeeService{
         throw new IllegalArgumentException("Email already exists");}}
 
     Employee updateEmployee = employee.update(request, department, file);
-    Employee createdEmployee = employeeRepository.save(updateEmployee);
-    return employeeMapper.toResponse(createdEmployee);
+    Employee savedEmployee = employeeRepository.save(updateEmployee);
+
+    employeeLogService.createLog(beforeEmployee, savedEmployee, request.memo(), ip);
+    return employeeMapper.toResponse(savedEmployee);
   }
 
   @Override
