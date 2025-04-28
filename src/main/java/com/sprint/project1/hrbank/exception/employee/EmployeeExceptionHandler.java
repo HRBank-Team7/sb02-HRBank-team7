@@ -1,6 +1,7 @@
 package com.sprint.project1.hrbank.exception.employee;
 
 import com.sprint.project1.hrbank.exception.ErrorResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,7 +12,7 @@ public class EmployeeExceptionHandler {
     @ExceptionHandler(EmployeeNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleEmployeeNotFoundException(EmployeeNotFoundException ex) {
         return ResponseEntity
-                .internalServerError()
+                .status(HttpStatus.NOT_FOUND)
                 .body(ErrorResponse.of("EMPLOYEE_NOT_FOUND", ex.getMessage()));
     }
 
@@ -25,7 +26,7 @@ public class EmployeeExceptionHandler {
     @ExceptionHandler(DuplicateEmployeeEmailException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateEmployeeEmailException(DuplicateEmployeeEmailException ex) {
         return ResponseEntity
-                .internalServerError()
+                .status(HttpStatus.CONFLICT)
                 .body(ErrorResponse.of("DUPLICATE EMAIL", ex.getMessage()));
     }
 
