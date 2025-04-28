@@ -246,14 +246,6 @@ public class EmployeeServiceImpl implements EmployeeService{
     }
   }
 
-//  private String decodeCursor(String cursor) {
-//    try {
-//      return new String(Base64.getDecoder().decode(cursor), StandardCharsets.UTF_8);
-//    }catch(IllegalArgumentException ex){
-//      throw new InvalidCursorFormatException("잘못된 커서 형식입니다.");
-//    }
-//  }
-
   private String extractCursor(Employee lastEmployee, EmployeeSearchRequest request) {
     String extractedCursor = switch(request.sortField()) {
       case "hireDate" -> lastEmployee.getHireDate().toString();

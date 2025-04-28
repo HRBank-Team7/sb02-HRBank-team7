@@ -64,7 +64,7 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
         LOWER(d.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
         OR LOWER(d.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
       )
-    ORDER BY d.establishedDate ASC
+    ORDER BY d.establishedDate ASC, d.id ASC
     """)
     List<Department> findFirstPageByEstablishedDateAsc(@Param("keyword") String keyword, Pageable pageable);
 
@@ -75,10 +75,13 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
         LOWER(d.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
         OR LOWER(d.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
       )
-       AND d.establishedDate > :cursorDate
-    ORDER BY d.establishedDate ASC
+       AND (
+           d.establishedDate > :cursorDate
+           OR (d.establishedDate = :cursorDate AND d.id > :cursorId)
+       )
+    ORDER BY d.establishedDate ASC, d.id ASC
     """)
-    List<Department> findNextPageByEstablishedDateAsc(@Param("keyword") String keyword, @Param("cursorDate") LocalDate cursorDate, Pageable pageable);
+    List<Department> findNextPageByEstablishedDateAsc(@Param("keyword") String keyword, @Param("cursorDate") LocalDate cursorDate, @Param("cursorId") Long cursorId, Pageable pageable);
 
 
     @Query("""
@@ -88,7 +91,7 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
         LOWER(d.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
         OR LOWER(d.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
       )
-    ORDER BY d.establishedDate DESC
+    ORDER BY d.establishedDate DESC, d.id DESC
     """)
     List<Department> findFirstPageByEstablishedDateDesc(@Param("keyword") String keyword, Pageable pageable);
 
@@ -99,10 +102,13 @@ public interface DepartmentRepository extends JpaRepository<Department, Long> {
         LOWER(d.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
         OR LOWER(d.description) LIKE LOWER(CONCAT('%', :keyword, '%'))
       )
-      AND d.establishedDate < :cursorDate
-    ORDER BY d.establishedDate DESC
+      AND (
+           d.establishedDate < :cursorDate
+           OR (d.establishedDate = :cursorDate AND d.id < :cursorId)
+       )
+    ORDER BY d.establishedDate DESC, d.id DESC
     """)
-    List<Department> findNextPageByEstablishedDateDesc(@Param("keyword") String keyword, @Param("cursorDate") LocalDate cursorDate, Pageable pageable);
+    List<Department> findNextPageByEstablishedDateDesc(@Param("keyword") String keyword, @Param("cursorDate") LocalDate cursorDate, @Param("cursorId") Long cursorId, Pageable pageable);
 
     Long countByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String nameKeyword, String descriptionKeyword);
 

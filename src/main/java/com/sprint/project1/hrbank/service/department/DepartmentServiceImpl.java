@@ -20,6 +20,8 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.sprint.project1.hrbank.util.CursorManager;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import lombok.RequiredArgsConstructor;
@@ -64,14 +66,16 @@ public class DepartmentServiceImpl implements DepartmentService {
         String keyword = extractKeywordFromRequest(request);
         Pageable pageable = PageRequest.of(0, request.size() + 1);
         String sortField = request.sortField();
+        Long idAfter = request.idAfter();
         String sortDirection = request.sortDirection();
 
-        String cursor = (request.cursor() != null) ? decodeCursor(request.cursor()) : null;
+
+        String cursor = (request.cursor() != null) ? CursorManager.decodeCursorToString(request.cursor()) : null;
         LocalDate cursorDate = ("establishedDate".equals(sortField) && cursor != null)
             ? parseCursorDate(cursor)
             : null;
 
-        List<Department> departments = getDepartments(cursor, sortField, sortDirection,
+        List<Department> departments = getDepartments(cursor, idAfter, sortField, sortDirection,
             keyword, pageable, cursorDate);
 
         boolean hasNext = departments.size() == request.size() + 1;
@@ -152,7 +156,7 @@ public class DepartmentServiceImpl implements DepartmentService {
             : null;
     }
 
-    private List<Department> getDepartments(String cursor, String sortField, String sortDirection,
+    private List<Department> getDepartments(String cursor, Long idAfter, String sortField, String sortDirection,
         String keyword, Pageable pageable, LocalDate cursorDate) {
         List<Department> departments;
         if (cursor == null) {
@@ -172,9 +176,9 @@ public class DepartmentServiceImpl implements DepartmentService {
                     : departmentRepository.findNextPageByNameAsc(keyword, cursor, pageable);
             } else {
                 departments = sortDirection.equals("desc") ?
-                    departmentRepository.findNextPageByEstablishedDateDesc(keyword, cursorDate,
+                    departmentRepository.findNextPageByEstablishedDateDesc(keyword, cursorDate, idAfter,
                         pageable)
-                    : departmentRepository.findNextPageByEstablishedDateAsc(keyword, cursorDate,
+                    : departmentRepository.findNextPageByEstablishedDateAsc(keyword, cursorDate, idAfter,
                         pageable);
             }
         }
@@ -206,14 +210,6 @@ public class DepartmentServiceImpl implements DepartmentService {
         return Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8));
     }
 
-
-    private static String decodeCursor(String cursor) {
-        try {
-            return new String(Base64.getDecoder().decode(cursor.toString()), StandardCharsets.UTF_8);
-        } catch (Exception ex) {
-            throw new InvalidCursorFormatException("잘못된 커서 형식입니다.");
-        }
-    }
 
     private static String getNextCursor(boolean hasNext, Department nextCursorDepartment,
         String sortField) {
