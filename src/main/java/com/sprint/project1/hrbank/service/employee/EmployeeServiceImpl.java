@@ -97,24 +97,24 @@ public class EmployeeServiceImpl implements EmployeeService{
         .orElseThrow(() -> new EmployeeNotFoundException("직원을 찾을 수 없습니다."));
 
     Employee beforeEmployee = employee.toBuilder().build();
-    File file = Optional.ofNullable(profile)
-        .filter(p -> !p.isEmpty())
-        .map(p -> {
-          try {
-            return fileService.create(new FileCreateRequest(
-                p.getOriginalFilename(),
-                p.getContentType(),
-                (long) p.getBytes().length,
-                p.getBytes()
-            ));
-          } catch (IOException e) {
-            throw new EmployeeProfileException("프로필 사진 처리 중 에러 발생");
-          }
-        })
-        .orElse(null);
 
-    if (employee.getFile() != null) {
-      fileService.delete(employee.getFile().getId());
+    File file = null;
+    if (profile != null && !profile.isEmpty()) {
+      if (employee.getFile() != null) {
+        fileService.delete(employee.getFile().getId());
+      }
+      try {
+        file = fileService.create(new FileCreateRequest(
+                profile.getOriginalFilename(),
+                profile.getContentType(),
+                (long) profile.getBytes().length,
+                profile.getBytes()
+        ));
+      } catch (IOException e) {
+        throw new EmployeeProfileException("프로필 사진 처리 중 에러 발생");
+      }
+    } else {
+      file = employee.getFile();
     }
 
     if (!employee.getEmail().equals(request.email())) {
