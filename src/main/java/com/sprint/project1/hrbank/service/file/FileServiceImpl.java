@@ -15,13 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class FileServiceImpl implements FileService {
     private final FileRepository fileRepository;
     private final FileMapper fileMapper;
     private final FileStorage fileStorage;
 
     @Override
+    @Transactional
     public File create(FileCreateRequest request) {
         File file = new File(request.name(), request.type(), request.size());
         fileRepository.save(file);
@@ -30,6 +30,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    @Transactional
     public File create(FileCreateRequest request, String filePath) {
         File file = new File(request.name(), request.type(), request.size());
         fileRepository.save(file);
@@ -45,6 +46,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Resource downloadByName(Long fileId) {
         File file = fileRepository.findById(fileId)
             .orElseThrow(() -> new FileNotFoundException("파일을 찾을 수 없습니다."));
@@ -53,6 +55,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public FileMetadata getMetadata(Long fileId) {
         File file = fileRepository.findById(fileId)
                 .orElseThrow(() -> new FileNotFoundException("파일을 찾을 수 없습니다."));
@@ -60,6 +63,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    @Transactional
     public void delete(Long fileId) {
         if (!fileRepository.existsById(fileId)){
             throw new FileNotFoundException("파일을 찾을 수 없습니다.");

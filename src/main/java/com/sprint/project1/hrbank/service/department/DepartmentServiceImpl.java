@@ -28,13 +28,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class DepartmentServiceImpl implements DepartmentService {
     private final DepartmentRepository departmentRepository;
     private final DepartmentMapper departmentMapper;
     private final EmployeeRepository employeeRepository;
 
     @Override
+    @Transactional
     public DepartmentResponse createDepartment(DepartmentCreateRequest createRequest) {
         Department department = new Department(createRequest.name(), createRequest.establishedDate(), createRequest.description());
         Department other = departmentRepository.findByName(createRequest.name());
@@ -48,6 +48,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public DepartmentResponse getDepartment(Long departmentId) {
         Department department = departmentRepository.findById(departmentId)
             .orElseThrow(() -> new DepartmentNotFoundException("부서를 찾을 수 없습니다."));
@@ -58,6 +59,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
 
     @Override
+    @Transactional(readOnly = true)
     public DepartmentPageResponse getDepartmentPage(DepartmentSearchRequest request) {
         String keyword = extractKeywordFromRequest(request);
         Pageable pageable = PageRequest.of(0, request.size() + 1);
@@ -106,6 +108,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    @Transactional
     public DepartmentResponse updateDepartment(Long departmentId, DepartmentUpdateRequest updateRequest) {
         Department department = departmentRepository.findById(departmentId)
                 .orElseThrow(() -> new DepartmentNotFoundException("부서를 찾을 수 없습니다."));
@@ -119,6 +122,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    @Transactional
     public void deleteDepartment(Long departmentId) {
         Department department = departmentRepository.findById(departmentId)
                 .orElseThrow(() -> new DepartmentNotFoundException("부서를 찾을 수 없습니다."));
