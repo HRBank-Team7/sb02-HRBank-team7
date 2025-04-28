@@ -7,7 +7,7 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
   datasource:
-    url: ${DATABASE_PUBLIC_URL}
+    url: jdbc:${DATABASE_PUBLIC_URL}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
