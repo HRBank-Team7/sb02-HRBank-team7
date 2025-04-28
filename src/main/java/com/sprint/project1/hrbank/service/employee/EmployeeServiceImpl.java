@@ -26,9 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -132,12 +130,9 @@ public class EmployeeServiceImpl implements EmployeeService{
     List<LocalDate> datePoints = Employee.generateDatePointTrend(from, to, unit);
     List<EmployeeTrendResponse> employeeTrendResponses = new ArrayList<>();
 
-    ZoneId zone = ZoneId.of("UTC");
-
     long preCount = 0;
     for (LocalDate date : datePoints) {
-      Instant toInstant = date.plusDays(1).atStartOfDay().atZone(zone).toInstant();
-      long count = employeeRepository.countEmployeesBefore(toInstant); // N+1 문제 발생됨
+      long count = employeeRepository.countEmployeesBefore(date.plusDays(1));
       long change = count - preCount;
       double changeRate = (preCount == 0) ? 0 : (double) change / preCount * 100;
       employeeTrendResponses.add(new EmployeeTrendResponse(date, count, change, changeRate));
