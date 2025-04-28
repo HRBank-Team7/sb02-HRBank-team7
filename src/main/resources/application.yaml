@@ -60,3 +60,6 @@ hrbank:
 
 backup:
   cron: "0 0 * * * *"
+
+server:
+  port: ${PORT:8080}
