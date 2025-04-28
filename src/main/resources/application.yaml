@@ -57,3 +57,6 @@ hrbank:
     type: local
     local:
       root-path: ./local-storages
+
+backup:
+  cron: "0 0 * * * *"
