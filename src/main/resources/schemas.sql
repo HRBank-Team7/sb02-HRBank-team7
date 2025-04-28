@@ -56,7 +56,7 @@ CREATE TABLE backups (
     id BIGSERIAL PRIMARY KEY,
     worker VARCHAR(50) NOT NULL,
     started_at TIMESTAMPTZ NOT NULL,
-    ended_at TIMESTAMPTZ NOT NULL,
+    ended_at TIMESTAMPTZ,
     status backup_status,
     file_id BIGINT,
     CONSTRAINT fk_file
