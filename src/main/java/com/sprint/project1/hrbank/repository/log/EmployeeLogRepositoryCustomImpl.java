@@ -1,7 +1,6 @@
 package com.sprint.project1.hrbank.repository.log;
 
 
-import com.sprint.project1.hrbank.dto.log.ChangeLogResponse;
 import com.sprint.project1.hrbank.dto.log.EmployeeLogCondition;
 import com.sprint.project1.hrbank.entity.log.EmployeeLog;
 import jakarta.persistence.EntityManager;
@@ -62,16 +61,26 @@ public class EmployeeLogRepositoryCustomImpl implements EmployeeLogRepositoryCus
     }
 
     //여기서부터 정렬 및 커서, 정렬 기준 (기본값:at, ipAddress <- 이거 앱에서는 id로 구분중)오름차순, 내림 차순
-    if("asc".equalsIgnoreCase(condition.sortDirection())){
-      if(condition.cursor() != null && condition.idAfter() != null){
-        predicates.add(cb.greaterThan(log.get("cursor"), condition.cursor()));
-        predicates.add(cb.greaterThan(log.get("id"), condition.idAfter()));
+    if("asc".equalsIgnoreCase(condition.sortDirection())){ // sortDirection이 asc 라면
+      if(condition.idAfter() != null && condition.cursor() != null){
+        if(condition.sortField().equals("at")) {
+          Instant cursorDate = Instant.parse(condition.cursor());
+          predicates.add(cb.greaterThan(log.get(condition.sortField()), cursorDate));
+        } else {
+          Long cursorId = Long.parseLong(condition.cursor());
+          predicates.add(cb.greaterThan(log.get("id"), cursorId));
+        }
       }
-      contentQuery.orderBy(cb.asc(log.get(condition.sortField())));
-    } else if("desc".equalsIgnoreCase(condition.sortDirection())){
-      if(condition.cursor() != null && condition.idAfter() != null){
-        predicates.add(cb.lessThan(log.get("cursor"), condition.cursor()));
-        predicates.add(cb.lessThan(log.get("id"), condition.idAfter()));
+      contentQuery.orderBy(cb.asc(log.get(condition.sortField()))); // sortField 기준으로 오름차순
+    } else if ("desc".equalsIgnoreCase((condition.sortDirection()))){
+      if(condition.idAfter() != null && condition.cursor() != null){
+        if(condition.sortField().equals("at")) {
+          Instant cursorDate = Instant.parse(condition.cursor());
+          predicates.add(cb.lessThan(log.get(condition.sortField()), cursorDate));
+        } else {
+          Long cursorId = Long.parseLong(condition.cursor());
+          predicates.add(cb.lessThan(log.get("id"), cursorId));
+        }
       }
       contentQuery.orderBy(cb.desc(log.get(condition.sortField())));
     }

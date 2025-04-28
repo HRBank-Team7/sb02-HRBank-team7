@@ -10,6 +10,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,14 +74,46 @@ public class EmployeeRepositoryCustomImpl implements EmployeeRepositoryCustom {
 //    정렬 조건 적용
     if("asc".equalsIgnoreCase(condition.sortDirection())){ // sortDirection이 asc 라면
       if(condition.idAfter() != null && condition.cursor() != null){
-        predicates.add(cb.greaterThan(employee.get("cursor"), condition.cursor()));
-        predicates.add(cb.greaterThan(employee.get("id"), condition.idAfter())); // 중복인 경우 id로 비교
+        if(condition.sortField().equals("hireDate")) {
+          LocalDate cursorDate = LocalDate.parse(condition.cursor());
+          predicates.add(cb.or(
+              cb.greaterThan(employee.get(condition.sortField()), cursorDate),
+              cb.and(
+                  cb.equal(employee.get(condition.sortField()), cursorDate),
+                  cb.greaterThan(employee.get("id"), condition.idAfter())
+              )
+          ));
+        } else {
+          predicates.add(cb.or(
+              cb.greaterThan(employee.get(condition.sortField()), condition.cursor()),
+              cb.and(
+                  cb.equal(employee.get(condition.sortField()), condition.cursor()),
+                  cb.greaterThan(employee.get("id"), condition.idAfter())
+              )
+          ));
+        }
       }
       contentQuery.orderBy(cb.asc(employee.get(condition.sortField()))); // sortField 기준으로 오름차순
     } else if ("desc".equalsIgnoreCase((condition.sortDirection()))){
       if(condition.idAfter() != null && condition.cursor() != null){
-        predicates.add(cb.lessThan(employee.get("cursor"), condition.cursor()));
-        predicates.add(cb.lessThan(employee.get("id"), condition.idAfter())); // 중복인 경우 id로 비교
+        if(condition.sortField().equals("hireDate")) {
+          LocalDate cursorDate = LocalDate.parse(condition.cursor());
+          predicates.add(cb.or(
+              cb.lessThan(employee.get(condition.sortField()), cursorDate),
+              cb.and(
+                  cb.equal(employee.get(condition.sortField()), cursorDate),
+                  cb.lessThan(employee.get("id"), condition.idAfter())
+              )
+          ));
+        } else {
+          predicates.add(cb.or(
+              cb.lessThan(employee.get(condition.sortField()), condition.cursor()),
+              cb.and(
+                  cb.equal(employee.get(condition.sortField()), condition.cursor()),
+                  cb.lessThan(employee.get("id"), condition.idAfter())
+              )
+          ));
+        }
       }
       contentQuery.orderBy(cb.desc(employee.get(condition.sortField())));
     }
@@ -104,4 +137,3 @@ public class EmployeeRepositoryCustomImpl implements EmployeeRepositoryCustom {
 //  Page<Employee> employee = employeeRepository.findEmployeeList(request); // Page == List
 //  Page<EmployeeResponse> employeeResponsePage = employee.map(employeeMapper::toResponse);
 //  return employeeMapper.toResponse(employeeResponsePage);
-

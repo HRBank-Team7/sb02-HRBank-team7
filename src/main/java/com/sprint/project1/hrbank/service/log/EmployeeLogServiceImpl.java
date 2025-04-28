@@ -72,9 +72,10 @@ public class EmployeeLogServiceImpl implements EmployeeLogService{
 //    sortField 기본 값 at, sortDirection 기본 값 desc
     String sortField = Objects.equals(request.sortField(), "ipAddress") ? "ipAddress" : "at";
     String sortDirection = Objects.equals(request.sortDirection(), "asc") ? "asc" : "desc";
-    String cursor = (request.cursor() != null)
-        ? CursorManager.decodeCursorToString(request.cursor())
-        : null;
+//    String cursor = (request.cursor() != null)
+//        ? CursorManager.decodeCursorToString(request.cursor())
+//        : null;
+    String cursor = request.cursor();
 
     if(cursor != null){
       checkCursorDateFormat(sortField, cursor);
@@ -116,7 +117,7 @@ public class EmployeeLogServiceImpl implements EmployeeLogService{
 
   private String extractCursor(EmployeeLog lastEmployeeLog, EmployeeLogSearchRequest request) {
     return "ipAddress".equals(request.sortField())
-        ? lastEmployeeLog.getIpAddress()
+        ? lastEmployeeLog.getId().toString()
         : lastEmployeeLog.getAt().toString();
 
   }
