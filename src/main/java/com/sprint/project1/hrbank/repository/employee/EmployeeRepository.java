@@ -19,8 +19,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, Emplo
   Long countByDepartmentId(Long departmentId);
 
   //기준 날짜 이전 직원 수
-  @Query("select count(e) from Employee e where e.createdAt < :before")
-  Long countEmployeesBefore(@Param("before") Instant before);
+  @Query("select count(e) from Employee e where e.hireDate < :before")
+  Long countEmployeesBefore(@Param("before") LocalDate before);
 
   //부서별 직원 수
   @Query("SELECT e.department.name, COUNT(e) FROM Employee e "
