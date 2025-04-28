@@ -113,6 +113,10 @@ public class EmployeeServiceImpl implements EmployeeService{
         })
         .orElse(null);
 
+    if (employee.getFile() != null) {
+      fileService.delete(employee.getFile().getId());
+    }
+
     if (!employee.getEmail().equals(request.email())) {
       if (employeeRepository.existsByEmail(request.email())){
         throw new DuplicateEmployeeEmailException("이미 존재하는 이메일 입니다.");}}
