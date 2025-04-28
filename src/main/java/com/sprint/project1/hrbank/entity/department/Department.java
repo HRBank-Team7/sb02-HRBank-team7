@@ -33,7 +33,7 @@ public class Department extends BaseTimeEntity {
       return;
     }
 
-    if (this.name.equals(other.getName())) {
+    if (this.id.equals(other.getId()) && this.name.equals(other.getName())) {
       throw new DuplicateDepartmentException("중복된 부서 이름입니다");
     }
   }
